@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using Moq;
 using NLog;
 using NUnit.Framework;

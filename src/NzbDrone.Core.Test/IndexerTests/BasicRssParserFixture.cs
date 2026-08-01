@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Text;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Indexers;

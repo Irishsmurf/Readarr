@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;

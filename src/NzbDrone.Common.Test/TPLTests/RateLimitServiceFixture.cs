@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.TPL;

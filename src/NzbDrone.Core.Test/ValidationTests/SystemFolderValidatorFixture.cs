@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Books;

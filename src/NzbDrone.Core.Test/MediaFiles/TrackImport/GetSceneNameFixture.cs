@@ -1,8 +1,8 @@
 using System.IO;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.MediaFiles.BookImport;

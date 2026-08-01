@@ -1,8 +1,8 @@
 using System;
 using System.Text;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;

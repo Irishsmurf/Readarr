@@ -2,9 +2,9 @@
 using System.Security.Principal;
 using System.ServiceProcess;
 using System.Threading;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Processes;

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Datastore.Migration;

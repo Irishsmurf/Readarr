@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Dapper;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
