@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Cache;

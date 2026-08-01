@@ -1,5 +1,7 @@
 using System.Reflection;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Reflection;
 using NzbDrone.Core.Datastore;

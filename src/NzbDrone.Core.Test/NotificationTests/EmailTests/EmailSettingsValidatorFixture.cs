@@ -1,6 +1,8 @@
 using System;
 using FizzWare.NBuilder;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Notifications.Email;
 using NzbDrone.Core.Test.Framework;

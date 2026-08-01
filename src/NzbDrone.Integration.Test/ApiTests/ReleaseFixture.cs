@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Net;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using Readarr.Api.V1.Indexers;
 

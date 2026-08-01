@@ -1,5 +1,7 @@
 using System.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Test.Common;
 using Readarr.Api.V1.Author;

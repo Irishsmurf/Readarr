@@ -1,6 +1,8 @@
 using System;
 using System.Xml.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Test.Framework;

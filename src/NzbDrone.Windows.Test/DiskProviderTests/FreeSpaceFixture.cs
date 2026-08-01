@@ -1,5 +1,7 @@
 using System.IO;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Test.DiskTests;
 using NzbDrone.Windows.Disk;
