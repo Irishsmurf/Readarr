@@ -16,7 +16,7 @@ concurrency:
 
 env:
   DOTNET_VERSION: '10.0.x'
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '24.x'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   MAJOR_VERSION: '0.4.19'
@@ -27,13 +27,13 @@ env:
 jobs:
   test:
     name: Unit tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: '**/TestResult.xml'
@@ -97,7 +97,7 @@ jobs:
 # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build binaries
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: test
 
     strategy:
@@ -117,15 +117,15 @@ jobs:
             arch: osx-arm64
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -194,7 +194,7 @@ jobs:
           fi
 
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: readarr-${{ matrix.arch }}
           path: ${{ steps.archive.outputs.path }}
@@ -205,13 +205,13 @@ jobs:
 # ─────────────────────────────────────────────────────────────────────────────
   release:
     name: Publish GitHub Release
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: build
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Derive version
         id: version
@@ -255,7 +255,7 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
 
       - name: Download all binary artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: readarr-*
           path: release-assets
