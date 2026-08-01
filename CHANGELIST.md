@@ -15,6 +15,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.19.2] - 2026-08-01
+
+### Fixed
+
+- **[CI]** Release workflow failed on all platforms due to a frontend build race condition.
+  All 6 matrix jobs start simultaneously; non-x64 legs tried to restore a GHA cache that
+  the x64 leg hadn't saved yet (`actions/cache` silently misses rather than blocking).
+  Additionally, `build.sh --backend` clears `_output/` at startup, so even a cache hit
+  would have been wiped before packaging. Fix: dedicated `build-frontend` job builds the
+  UI once and uploads it as a workflow artifact; each matrix leg downloads it after its
+  backend build. Also set `fail-fast: false` so one platform failure no longer cancels
+  all others.
+
+---
+
 ## [0.4.19.1] - 2026-08-01
 
 ### Fixed
@@ -41,5 +56,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 | **Security** | Security-related changes |
 | **Deprecated** | Soon-to-be removed features |
 
-[Unreleased]: https://github.com/Irishsmurf/Readarr/compare/v0.4.19.1...HEAD
+[Unreleased]: https://github.com/Irishsmurf/Readarr/compare/v0.4.19.2...HEAD
+[0.4.19.2]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.19.2
 [0.4.19.1]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.19.1
