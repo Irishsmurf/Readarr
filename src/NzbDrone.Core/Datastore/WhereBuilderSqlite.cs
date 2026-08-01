@@ -282,6 +282,32 @@ namespace NzbDrone.Core.Datastore
             ParseEnumerableContains(expression);
         }
 
+        private static bool IsSpanContains(MethodCallExpression body)
+        {
+            if (body.Method.DeclaringType != typeof(MemoryExtensions))
+            {
+                return false;
+            }
+
+            // The three argument overload takes an IEqualityComparer. The compiler
+            // only ever picks it with a null comparer, meaning default equality,
+            // which is what the generated SQL does anyway. A real comparer could
+            // not be honoured, so refuse rather than quietly ignore it.
+            if (body.Arguments.Count == 3)
+            {
+                if (body.Arguments[2] is not ConstantExpression { Value: null })
+                {
+                    return false;
+                }
+            }
+            else if (body.Arguments.Count != 2)
+            {
+                return false;
+            }
+
+            return body.Arguments[0] is MethodCallExpression { Method.Name: "op_Implicit", Arguments.Count: 1 };
+        }
+
         private void ParseEnumerableContains(MethodCallExpression body)
         {
             // Fish out the list and the item to compare
@@ -294,17 +320,25 @@ namespace NzbDrone.Core.Datastore
                 // Generic collection
                 item = body.Arguments[0];
             }
-            else
+            else if (body.Method.DeclaringType == typeof(Enumerable) && body.Arguments.Count == 2)
             {
                 // Static method
-                // Must be Enumerable.Contains(source, item)
-                if (body.Method.DeclaringType != typeof(Enumerable) || body.Arguments.Count != 2)
-                {
-                    throw new NotSupportedException("Unexpected form of Enumerable.Contains");
-                }
-
+                // Enumerable.Contains(source, item)
                 list = body.Arguments[0];
                 item = body.Arguments[1];
+            }
+            else if (IsSpanContains(body))
+            {
+                // On a modern compiler an array receiver binds to
+                // MemoryExtensions.Contains(ReadOnlySpan<T>, T) rather than to
+                // Enumerable.Contains, so the source arrives as the implicit
+                // array -> span conversion and has to be unwrapped again.
+                list = ((MethodCallExpression)body.Arguments[0]).Arguments[0];
+                item = body.Arguments[1];
+            }
+            else
+            {
+                throw new NotSupportedException("Unexpected form of Enumerable.Contains");
             }
 
             _sb.Append('(');
