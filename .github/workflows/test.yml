@@ -13,12 +13,6 @@ concurrency:
 
 env:
   DOTNET_VERSION: '10.0.x'
-  # The projects still target net6.0, so the test binaries need the 6.0 shared
-  # framework to host them. The runner image no longer ships it, and installing
-  # the 10.0 SDK does not supply it either. Building is done by the 10.0 SDK —
-  # global.json makes sure of that — this only puts the runtime back so the test
-  # host can start. Drops out with the retarget in #12.
-  DOTNET_LEGACY_VERSION: '6.0.x'
 
 jobs:
   unit:
@@ -31,17 +25,15 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            ${{ env.DOTNET_LEGACY_VERSION }}
-            ${{ env.DOTNET_VERSION }}
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build backend and test packages
-        run: ./build.sh --backend -f net6.0 -r linux-x64
+        run: ./build.sh --backend -f net10.0 -r linux-x64
 
       - name: Run unit tests
         run: |
           set -euo pipefail
-          tests=_tests/net6.0/linux-x64/publish
+          tests=_tests/net10.0/linux-x64/publish
           chmod a+x "$tests/test.sh" "$tests/Readarr.Test.Dummy"
           cd "$tests"
           ./test.sh Linux Unit Test

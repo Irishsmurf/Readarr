@@ -9,12 +9,18 @@
 # single apt layer.
 #
 # To build locally:
-#   ./build.sh --backend --frontend --packages -f net6.0 -r linux-x64
+#   ./build.sh --backend --frontend --packages -f net10.0 -r linux-x64
 #   mkdir -p docker/artifacts/amd64
-#   cp -r _artifacts/linux-x64/net6.0/Readarr/. docker/artifacts/amd64/
+#   cp -r _artifacts/linux-x64/net10.0/Readarr/. docker/artifacts/amd64/
 #   docker build -t readarr:local .
 
-ARG BASE_IMAGE=mcr.microsoft.com/dotnet/aspnet:6.0-jammy
+# The distro is pinned rather than taking the bare 10.0 tag, which resolves to a
+# different base than the 6.0 image used: noble is Ubuntu 24.04, so the package
+# names below and setpriv in the entrypoint behave as they did on jammy. The
+# patch level is deliberately left floating - the build sets
+# TargetLatestRuntimePatch, so the app asks for whatever patch it was built
+# against and a pinned base would have to be bumped in lockstep with the SDK.
+ARG BASE_IMAGE=mcr.microsoft.com/dotnet/aspnet:10.0-noble
 FROM ${BASE_IMAGE}
 
 # Readarr.Host uses Microsoft.NET.Sdk.Web, so it carries an implicit framework

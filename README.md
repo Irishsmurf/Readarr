@@ -47,7 +47,8 @@ Crash reports previously went to the Servarr team's Sentry instance, and update 
 Changes made here on top of the final upstream commit (`0b79d30`, "Retirement announcement"):
 
 * **qBittorrent 5.2.0+ login fix** — qBittorrent 5.2.0 changed a successful `POST /api/v2/auth/login` from `200 OK` with the body `Ok.` to `204 No Content` with an empty body. Readarr only accepted the literal `Ok.` body, so every successful login against qBittorrent 5.2.0 or newer was reported as an authentication failure even with correct credentials. Both proxy versions now accept `204 No Content` as success. ([#1](https://github.com/Irishsmurf/Readarr/issues/1), [#2](https://github.com/Irishsmurf/Readarr/pull/2))
-* **Security update to ImageSharp** — `SixLabors.ImageSharp` 3.1.7 → 3.1.12 ([GHSA-rxmq-m78w-7wmc](https://github.com/advisories/GHSA-rxmq-m78w-7wmc)). ImageSharp decodes cover art fetched from third-party metadata mirrors, so it handles untrusted input. `MailKit` remains on 4.8.0 with a known advisory ([GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr)) that **cannot be fixed while the project targets .NET 6** — 4.8.0 is the last release with a `net6.0` target, and the fix landed in 4.9.0. Tracked in [#9](https://github.com/Irishsmurf/Readarr/issues/9).
+* **Security update to ImageSharp** — `SixLabors.ImageSharp` 3.1.7 → 3.1.12 ([GHSA-rxmq-m78w-7wmc](https://github.com/advisories/GHSA-rxmq-m78w-7wmc)). ImageSharp decodes cover art fetched from third-party metadata mirrors, so it handles untrusted input. `MailKit` remains on 4.8.0 with a known advisory ([GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr)); it was unfixable while the project targeted .NET 6, and the retarget below has unblocked it. Tracked in [#9](https://github.com/Irishsmurf/Readarr/issues/9).
+* **.NET 10** — every project targets `net10.0`. .NET 6 reached end of life in November 2024, so neither the runtime nor the base image the published container was built on received security patches any more. ([#10](https://github.com/Irishsmurf/Readarr/issues/10))
 * **No telemetry to upstream** — crash reporting and update checks no longer contact the retired project's infrastructure. See [Upstream services are off by default](#upstream-services-are-off-by-default).
 * **CI** — every push and pull request builds the app, runs the unit test suite, and builds and smoke-tests the Docker image.
 
@@ -114,13 +115,13 @@ yarn install
 ./build.sh --backend --frontend --packages
 ```
 
-Useful flags: `--backend`, `--frontend`, `--packages`, `--lint`. Note that `--backend` clears `_output/` at the start of every run, so it must come before `--frontend` — the ordering above is deliberate. Packaged output lands in `_artifacts/<rid>/net6.0/Readarr/`. Run the test suites with `./test.sh`.
+Useful flags: `--backend`, `--frontend`, `--packages`, `--lint`. Note that `--backend` clears `_output/` at the start of every run, so it must come before `--frontend` — the ordering above is deliberate. Packaged output lands in `_artifacts/<rid>/net10.0/Readarr/`. Run the test suites with `./test.sh`.
 
 To build the Docker image locally, stage the packaged output where the `Dockerfile` expects it:
 
 ```bash
 mkdir -p docker/artifacts/amd64
-cp -r _artifacts/linux-x64/net6.0/Readarr/. docker/artifacts/amd64/
+cp -r _artifacts/linux-x64/net10.0/Readarr/. docker/artifacts/amd64/
 rm -rf docker/artifacts/amd64/Readarr.Update
 docker build -t readarr:local .
 ```

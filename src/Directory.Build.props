@@ -8,6 +8,16 @@
 
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+
+    <!--
+        Publish framework-dependent. This was the behaviour on .NET 6 too, but it
+        was never written down: the SDK derives SelfContained from whether a RID
+        is set, and PublishAllRids.targets always sets one. State it, so the
+        published layout does not quietly change with a future SDK.
+        The image relies on this - it ships on dotnet/aspnet rather than carrying
+        a runtime of its own.
+    -->
+    <SelfContained>false</SelfContained>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <ReadarrRootDir>$(MSBuildThisFileDirectory)..\</ReadarrRootDir>

@@ -80,8 +80,14 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                     {
                         item.RemainingTime = TimeSpan.FromSeconds(torrent.Eta);
                     }
-                    catch (OverflowException)
+                    catch (Exception ex) when (ex is OverflowException or ArgumentOutOfRangeException)
                     {
+                        // Some clients report the ETA in milliseconds, and this falls back to
+                        // that reading when the value is too large to be seconds. Which
+                        // exception says so depends on the framework: Eta is a long, and .NET 8
+                        // added a long overload of FromSeconds that raises
+                        // ArgumentOutOfRangeException where the double overload it used to bind
+                        // to raised OverflowException.
                         item.RemainingTime = TimeSpan.FromMilliseconds(torrent.Eta);
                     }
                 }
