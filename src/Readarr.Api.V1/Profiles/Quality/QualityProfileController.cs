@@ -27,6 +27,11 @@ namespace Readarr.Api.V1.Profiles.Quality
 
             SharedValidator.RuleFor(c => c.FormatItems).Must(items =>
             {
+                if (items == null)
+                {
+                    return false;
+                }
+
                 var all = _formatService.All().Select(f => f.Id).ToList();
                 var ids = items.Select(i => i.Format);
 
@@ -35,8 +40,13 @@ namespace Readarr.Api.V1.Profiles.Quality
 
             SharedValidator.RuleFor(c => c).Custom((profile, context) =>
             {
+                if (profile.FormatItems == null || !profile.FormatItems.Any())
+                {
+                    return;
+                }
+
                 if (profile.FormatItems.Where(x => x.Score > 0).Sum(x => x.Score) < profile.MinFormatScore &&
-                    profile.FormatItems.Max(x => x.Score) < profile.MinFormatScore)
+                    profile.FormatItems.DefaultIfEmpty().Max(x => x == null ? 0 : x.Score) < profile.MinFormatScore)
                 {
                     context.AddFailure("Minimum Custom Format Score can never be satisfied");
                 }
