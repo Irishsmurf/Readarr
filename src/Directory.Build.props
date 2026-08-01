@@ -49,6 +49,31 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
+  <!--
+      NuGet audit findings that are known and currently unfixable, suppressed one
+      advisory at a time. NU1901-NU1904 used to sit in WarningsNotAsErrors, which
+      silenced every advisory including ones nobody had looked at. These entries
+      keep the audit failing the build for anything new while naming what is
+      already understood.
+
+      All three come from one place. Servarr.FluentMigrator.Runner is a
+      meta-package that drags in every database provider FluentMigrator supports,
+      including SqlServer, whose Microsoft.Data.SqlClient 2.1.2 brings the
+      IdentityModel pair and - via ConfigurationManager and Security.Permissions -
+      System.Drawing.Common. Readarr talks to SQLite and Postgres only and already
+      references those two providers directly, so dropping the meta-package should
+      remove all of this. That touches migrations, so it wants its own change and
+      its own smoke test rather than riding along here.
+  -->
+  <ItemGroup>
+    <!-- Microsoft.Data.SqlClient 2.1.2 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-98g6-xh36-x2p7" />
+    <!-- Microsoft.IdentityModel.JsonWebTokens and System.IdentityModel.Tokens.Jwt 6.8.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-59j7-ghrg-fj52" />
+    <!-- System.Drawing.Common 4.7.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rxg9-xrhp-64gj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
     <!-- Centralize intermediate and default outputs -->
