@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Support via Discord
-    url: https://readarr.com/discord
-    about: Chat with users and devs on support and setup related topics.
+  - name: General Readarr documentation
+    url: https://wiki.servarr.com/readarr
+    about: Setup guides and FAQ for Readarr in general (not fork-specific).

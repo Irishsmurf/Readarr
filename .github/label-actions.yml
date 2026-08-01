@@ -2,11 +2,10 @@
 
 'Type: Support':
   comment: >
-    :wave: @{issue-author}, we use the issue tracker exclusively
-    for bug reports and feature requests. However, this issue appears
-    to be a support request. Please hop over onto our [Discord](https://readarr.com/discord).
-  close: true
-  close-reason: 'not planned'
+    :wave: @{issue-author}, this issue tracker is for bug reports and
+    feature requests against this fork. This looks like a support
+    question rather than a bug — please add more detail here and a
+    maintainer will follow up.
 
 'Status: Logs Needed':
   comment: >
