@@ -1,7 +1,5 @@
 using System;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Cache;
 using NzbDrone.Test.Common;

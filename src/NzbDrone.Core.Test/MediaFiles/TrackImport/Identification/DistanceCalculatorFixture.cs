@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles.BookImport.Identification;
 using NzbDrone.Test.Common;
