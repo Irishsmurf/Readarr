@@ -89,8 +89,8 @@ Two differences from the linuxserver.io image worth knowing:
 
 Requirements:
 
-* .NET SDK 6.0
-* Node.js and Yarn (for the frontend)
+* .NET SDK 6.0 — `global.json` pins the build to the 6.0 band, so a newer SDK alone will not do
+* Node.js 20 and Yarn 1.x (for the frontend)
 
 ```bash
 git clone https://github.com/Irishsmurf/Readarr.git

@@ -37,6 +37,14 @@
         CS1591: Missing XML comment for publicly visible type or member 'Type_or_Member'
     -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!--
+        NU1901-NU1904: NuGet security audit findings. The audit runs on SDK 8 and
+        newer, so with TreatWarningsAsErrors it turns any advisory published
+        against a pinned dependency into a build failure. Upstream is archived and
+        will not be bumping those pins, so keep the findings visible as warnings
+        rather than letting them block the build.
+    -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
