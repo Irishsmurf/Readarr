@@ -1,8 +1,6 @@
 using System;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Housekeeping.Housekeepers;

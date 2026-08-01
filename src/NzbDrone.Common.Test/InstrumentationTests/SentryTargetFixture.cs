@@ -1,9 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NLog;
 using NUnit.Framework;
 using NzbDrone.Common.EnvironmentInfo;

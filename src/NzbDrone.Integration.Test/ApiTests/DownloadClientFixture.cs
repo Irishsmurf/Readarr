@@ -1,7 +1,5 @@
 using System.Linq;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace NzbDrone.Integration.Test.ApiTests

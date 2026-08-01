@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Test.Framework;

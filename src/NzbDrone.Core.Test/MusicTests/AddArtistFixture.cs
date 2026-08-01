@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;

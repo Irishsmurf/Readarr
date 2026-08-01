@@ -1,7 +1,5 @@
 using System.Reflection;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Automation.Test.PageModel;
 using OpenQA.Selenium;

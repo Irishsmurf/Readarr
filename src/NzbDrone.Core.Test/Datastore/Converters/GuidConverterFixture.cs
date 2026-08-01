@@ -1,8 +1,6 @@
 using System;
 using System.Data.SQLite;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Datastore.Converters;
 using NzbDrone.Core.Test.Framework;

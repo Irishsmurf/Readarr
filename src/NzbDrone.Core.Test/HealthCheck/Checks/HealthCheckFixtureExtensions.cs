@@ -1,6 +1,4 @@
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.HealthCheck;
 
