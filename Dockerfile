@@ -9,9 +9,9 @@
 # single apt layer.
 #
 # To build locally:
-#   ./build.sh --backend --frontend --packages -f net6.0 -r linux-x64
+#   ./build.sh --backend --frontend --packages -f net10.0 -r linux-x64
 #   mkdir -p docker/artifacts/amd64
-#   cp -r _artifacts/linux-x64/net6.0/Readarr/. docker/artifacts/amd64/
+#   cp -r _artifacts/linux-x64/net10.0/Readarr/. docker/artifacts/amd64/
 #   docker build -t readarr:local .
 
 ARG BASE_IMAGE=mcr.microsoft.com/dotnet/aspnet:6.0-jammy

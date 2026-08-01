@@ -57,14 +57,14 @@ jobs:
           # build.sh clears _output at the start of every backend build, and the
           # frontend lands in _output/UI, so the UI is stashed and restored
           # rather than rebuilt once per architecture.
-          ./build.sh --backend -f net6.0 -r linux-x64
+          ./build.sh --backend -f net10.0 -r linux-x64
           ./build.sh --frontend
           cp -r _output/UI _ui
-          ./build.sh --packages -f net6.0 -r linux-x64
+          ./build.sh --packages -f net10.0 -r linux-x64
 
-          ./build.sh --backend -f net6.0 -r linux-arm64
+          ./build.sh --backend -f net10.0 -r linux-arm64
           cp -r _ui _output/UI
-          ./build.sh --packages -f net6.0 -r linux-arm64
+          ./build.sh --packages -f net10.0 -r linux-arm64
 
       - name: Stage artifacts for the image
         run: |
@@ -72,7 +72,7 @@ jobs:
           stage() {
             local rid="$1" arch="$2"
             mkdir -p "docker/artifacts/${arch}"
-            cp -r "_artifacts/${rid}/net6.0/Readarr/." "docker/artifacts/${arch}/"
+            cp -r "_artifacts/${rid}/net10.0/Readarr/." "docker/artifacts/${arch}/"
             # Drop the in-app updater: it would pull an upstream build that does
             # not carry this fork's fixes.
             rm -rf "docker/artifacts/${arch}/Readarr.Update"
