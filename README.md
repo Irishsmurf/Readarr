@@ -17,7 +17,7 @@ This repository is a personal fork of that codebase, maintained by [@Irishsmurf]
 
 * **Best effort, no guarantees.** This is a spare-time project. There is no roadmap, no release schedule, and no support commitment.
 * **Bug fixes over new features.** The focus is keeping an already-working install working — download client compatibility, breakages against newer third-party APIs, and similar. Large new features are unlikely.
-* **No official builds.** Upstream's Azure pipeline does not run here. Build from source (see below) or keep using an existing Readarr install and apply changes yourself.
+* **Docker images are published from this repo.** Every push to `main` builds and publishes a multi-arch image to GHCR (see [Installation](#installation)). Upstream's Azure pipeline does not run here.
 * **Issues and PRs are welcome**, and are read — just don't expect a fast turnaround. Please do not open issues on the archived upstream repository; use [this fork's issue tracker](https://github.com/Irishsmurf/Readarr/issues).
 * **Not affiliated with the Servarr team.** Please don't ask them to support anything in this fork.
 
@@ -50,12 +50,47 @@ Changes made here on top of the final upstream commit (`0b79d30`, "Retirement an
 * Full integration with Calibre (add to library, conversion) (Requires Calibre Content Server)
 * And a beautiful UI
 
+## Installation
+
+Multi-arch images (`linux/amd64`, `linux/arm64`) are published to GHCR on every push to `main`:
+
+```bash
+docker pull ghcr.io/irishsmurf/readarr:latest
+```
+
+Tags: `latest` tracks `main`, and each build also gets an immutable `0.4.19.<build>` tag plus a `sha-<short>` tag. Pin to a version tag if you'd rather upgrade deliberately.
+
+The image follows the linuxserver.io conventions (`PUID`, `PGID`, `UMASK`, config at `/config`, port `8787`), so an existing LSIO compose file works with only the image line changed:
+
+```yaml
+services:
+  readarr:
+    image: ghcr.io/irishsmurf/readarr:latest
+    container_name: readarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /path/to/config:/config
+      - /path/to/books:/books
+      - /path/to/downloads:/downloads
+    ports:
+      - 8787:8787
+    restart: unless-stopped
+```
+
+Two differences from the linuxserver.io image worth knowing:
+
+* **The in-app updater is removed.** It would download an upstream build and overwrite this fork's fixes. Update by pulling a new image tag.
+* **Back up `/config/readarr.db` before your first switch.** There are no schema migrations between 0.4.18 and current `main`, so rolling back to the LSIO image works, but a backup costs nothing.
+
 ## Building From Source
 
 Requirements:
 
-* .NET SDK 6.0
-* Node.js and Yarn (for the frontend)
+* .NET SDK 6.0 — `global.json` pins the build to the 6.0 band, so a newer SDK alone will not do
+* Node.js 20 and Yarn 1.x (for the frontend)
 
 ```bash
 git clone https://github.com/Irishsmurf/Readarr.git
@@ -64,7 +99,16 @@ yarn install
 ./build.sh --backend --frontend --packages
 ```
 
-Useful flags: `--backend`, `--frontend`, `--packages`, `--lint`. Build output lands in `_output/`. Run the test suites with `./test.sh`.
+Useful flags: `--backend`, `--frontend`, `--packages`, `--lint`. Note that `--backend` clears `_output/` at the start of every run, so it must come before `--frontend` — the ordering above is deliberate. Packaged output lands in `_artifacts/<rid>/net6.0/Readarr/`. Run the test suites with `./test.sh`.
+
+To build the Docker image locally, stage the packaged output where the `Dockerfile` expects it:
+
+```bash
+mkdir -p docker/artifacts/amd64
+cp -r _artifacts/linux-x64/net6.0/Readarr/. docker/artifacts/amd64/
+rm -rf docker/artifacts/amd64/Readarr.Update
+docker build -t readarr:local .
+```
 
 The upstream [development wiki page](https://wiki.servarr.com/readarr/contributing) still describes the general layout of the codebase and remains a reasonable reference, even though the project itself is retired.
 
