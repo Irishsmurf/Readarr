@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DOTNET_VERSION: '6.0.427'
+  DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20.x'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
