@@ -438,7 +438,8 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 }
 
                 // returns "Fails." on bad login
-                if (response.Content != "Ok.")
+                // qBittorrent 5.2.0+ returns 204 No Content with an empty body on success
+                if (response.StatusCode != HttpStatusCode.NoContent && response.Content != "Ok.")
                 {
                     _logger.Debug("qbitTorrent authentication failed.");
                     throw new DownloadClientAuthenticationException("Failed to authenticate with qBittorrent.");
