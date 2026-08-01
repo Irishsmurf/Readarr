@@ -80,6 +80,13 @@ jobs:
           stage linux-x64 amd64
           stage linux-arm64 arm64
 
+      # The image installs libsqlite3-0, and a RUN layer executes in the target
+      # platform's rootfs, so the arm64 build needs emulation.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 

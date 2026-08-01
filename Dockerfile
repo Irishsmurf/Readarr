@@ -4,9 +4,9 @@
 #
 # This expects the application to have been built already and staged into
 # docker/artifacts/<arch>/ — see .github/workflows/docker.yml. Building the app
-# inside the Dockerfile would mean running the .NET SDK under emulation for the
-# arm64 image; staging prebuilt output keeps this to plain COPY layers so both
-# architectures build natively without QEMU.
+# inside the Dockerfile would mean running the whole .NET SDK under emulation for
+# the arm64 image; staging prebuilt output keeps the emulated work down to a
+# single apt layer.
 #
 # To build locally:
 #   ./build.sh --backend --frontend --packages -f net6.0 -r linux-x64
@@ -38,6 +38,14 @@ ENV READARR_CONFIG_DIR=/config \
     PGID=1000 \
     UMASK=002 \
     DOTNET_EnableDiagnostics=0
+
+# System.Data.SQLite P/Invokes the system libsqlite3 rather than bundling it —
+# AssemblyLoader maps "sqlite3" to "libsqlite3.so.0" on Linux — and the aspnet
+# base image does not ship it. Without this the app builds and starts, then dies
+# with DllNotFoundException the moment it opens the database.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libsqlite3-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 # The staging step drops Readarr.Update: the in-app updater would replace these
 # binaries with an upstream build that does not carry this fork's fixes. Image
