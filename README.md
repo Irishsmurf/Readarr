@@ -1,36 +1,40 @@
-# Announcement: Retirement of Readarr
+# Readarr (Community Fork)
 
-We would like to announce that the [Readarr project](<https://github.com/Readarr/Readarr>) has been retired. This difficult decision was made due to a combination of factors: the project's metadata has become unusable, we no longer have the time to remake or repair it, and the community effort to transition to using Open Library as the source has stalled without much progress.
-
-Third-party metadata mirrors exist, but as we're not involved with them at all, we cannot provide support for them. Use of them is entirely at your own risk. The most popular mirror appears to be [rreading-glasses](<https://github.com/blampe/rreading-glasses>).
-
-Without anyone to take over Readarr development, we expect it to wither away, so we still encourage you to seek alternatives to Readarr.
-
-## Key Points:
-- **Effective Immediately**: The retirement takes effect immediately. Please stay tuned for any possible further communications.
-- **Support Window**: We will provide support during a brief transition period to help with troubleshooting non metadata related issues.
-- **Alternative Solutions**: Users are encouraged to explore and adopt any other possible solutions as alternatives to Readarr.
-- **Opportunities for Revival**: We are open to someone taking over and revitalizing the project. If you are interested, please get in touch.
-- **Gratitude**: We extend our deepest gratitude to all the contributors and community members who supported Readarr over the years.
-
-Thank you for being part of the Readarr journey. For any inquiries or assistance during this transition, please contact our team.
-
-Sincerely,  
-The Servarr Team
-
-# Readarr
-
-[![Build Status](https://dev.azure.com/Readarr/Readarr/_apis/build/status/Readarr.Readarr?branchName=develop)](https://dev.azure.com/Readarr/Readarr/_build/latest?definitionId=1&branchName=develop)
-[![Translated](https://translate.servarr.com/widgets/servarr/-/readarr/svg-badge.svg)](https://translate.servarr.com/engage/readarr/?utm_source=widget)
-[![Docker Pulls](https://img.shields.io/docker/pulls/hotio/readarr)](https://wiki.servarr.com/readarr/installation#docker)
-[![Donors on Open Collective](https://opencollective.com/Readarr/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/Readarr/sponsors/badge.svg)](#sponsors)
-[![Mega Sponsors on Open Collective](https://opencollective.com/Readarr/megasponsors/badge.svg)](#mega-sponsors)
-
-### Readarr is currently in beta testing and is generally still in a work in progress. Features may be broken, incomplete, or cause spontaneous combustion
+[![License: GPL v3](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Fork status: personally maintained](https://img.shields.io/badge/fork-personally%20maintained-orange.svg)](#about-this-fork)
 
 Readarr is an ebook and audiobook collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new books from your favorite authors and will grab, sort, and rename them.
-Note that only one type of a given book is supported. If you want both an audiobook and ebook of a given book you will need multiple instances.
+
+Note that only one type of a given book is supported. If you want both an audiobook and an ebook of a given book you will need multiple instances.
+
+## About This Fork
+
+The upstream [Readarr/Readarr](https://github.com/Readarr/Readarr) project was [retired and archived by the Servarr team in June 2025](https://github.com/Readarr/Readarr/blob/develop/README.md). Their reasoning, in short: the official metadata service had become unusable, there was no time left to rebuild it, and the community effort to move to Open Library had stalled.
+
+This repository is a personal fork of that codebase, maintained by [@Irishsmurf](https://github.com/Irishsmurf). It exists so that the bugs I hit in my own setup actually get fixed instead of sitting in an archived repo forever.
+
+**What that means in practice:**
+
+* **Best effort, no guarantees.** This is a spare-time project. There is no roadmap, no release schedule, and no support commitment.
+* **Bug fixes over new features.** The focus is keeping an already-working install working — download client compatibility, breakages against newer third-party APIs, and similar. Large new features are unlikely.
+* **No official builds.** Upstream's Azure pipeline does not run here. Build from source (see below) or keep using an existing Readarr install and apply changes yourself.
+* **Issues and PRs are welcome**, and are read — just don't expect a fast turnaround. Please do not open issues on the archived upstream repository; use [this fork's issue tracker](https://github.com/Irishsmurf/Readarr/issues).
+* **Not affiliated with the Servarr team.** Please don't ask them to support anything in this fork.
+
+### You still need a metadata mirror
+
+The official Readarr metadata server is gone, and nothing in this fork replaces it. To have a usable install you need a third-party metadata mirror; the most widely used one is [rreading-glasses](https://github.com/blampe/rreading-glasses). Those mirrors are maintained by other people — this fork is not involved with them and cannot support them. Use them at your own risk.
+
+### Branches
+
+* `main` — the primary branch for this fork. Work lands here.
+* `develop` — retained to line up with upstream's original branch layout and history.
+
+## Changes in This Fork
+
+Changes made here on top of the final upstream commit (`0b79d30`, "Retirement announcement"):
+
+* **qBittorrent 5.2.0+ login fix** — qBittorrent 5.2.0 changed a successful `POST /api/v2/auth/login` from `200 OK` with the body `Ok.` to `204 No Content` with an empty body. Readarr only accepted the literal `Ok.` body, so every successful login against qBittorrent 5.2.0 or newer was reported as an authentication failure even with correct credentials. Both proxy versions now accept `204 No Content` as success. ([#1](https://github.com/Irishsmurf/Readarr/issues/1), [#2](https://github.com/Irishsmurf/Readarr/pull/2))
 
 ## Major Features Include
 
@@ -46,51 +50,41 @@ Note that only one type of a given book is supported. If you want both an audiob
 * Full integration with Calibre (add to library, conversion) (Requires Calibre Content Server)
 * And a beautiful UI
 
-## Support
+## Building From Source
 
-[![Wiki](https://img.shields.io/badge/servarr-wiki-181717.svg?maxAge=60)](https://wiki.servarr.com/readarr)
-[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://readarr.com/discord)
+Requirements:
 
-Note: GitHub Issues are for Bugs and Feature Requests Only
+* .NET SDK 6.0
+* Node.js and Yarn (for the frontend)
 
-[![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Readarr/Readarr/issues)
+```bash
+git clone https://github.com/Irishsmurf/Readarr.git
+cd Readarr
+yarn install
+./build.sh --backend --frontend --packages
+```
 
-## Contributors & Developers
+Useful flags: `--backend`, `--frontend`, `--packages`, `--lint`. Build output lands in `_output/`. Run the test suites with `./test.sh`.
 
-[API Documentation](https://readarr.com/docs/api/)
+The upstream [development wiki page](https://wiki.servarr.com/readarr/contributing) still describes the general layout of the codebase and remains a reasonable reference, even though the project itself is retired.
 
-This project exists thanks to all the people who contribute.
-- [Contribute (GitHub)](CONTRIBUTING.md)
-- [Contribution (Wiki Article)](https://wiki.servarr.com/readarr/contributing)
+## Documentation & Support
 
-[![Contributors List](https://opencollective.com/Readarr/contributors.svg?width=890&button=false)](https://github.com/Readarr/Readarr/graphs/contributors)
+The upstream documentation still applies to the application itself, with the caveat that anything about official metadata or official support is no longer accurate:
 
-## Backers
+* [Servarr wiki (Readarr)](https://wiki.servarr.com/readarr) — setup and configuration reference
+* [API documentation](https://readarr.com/docs/api/)
 
-Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/Readarr#backer)
+Support for **this fork** is via [GitHub issues on this repository](https://github.com/Irishsmurf/Readarr/issues) only. The Servarr Discord does not support this fork.
 
-[![Backers List](https://opencollective.com/Readarr/backers.svg?width=890)](https://opencollective.com/Readarr#backer)
+## Credits
 
-## Sponsors
+All of the real work here was done by the Readarr and Servarr teams and their contributors, and by the Sonarr project this codebase descends from. This fork is a thin layer on top of many years of other people's work.
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/readarr#sponsor)
+* [Upstream contributors](https://github.com/Readarr/Readarr/graphs/contributors)
+* [Readarr on Open Collective](https://opencollective.com/Readarr) — upstream's backers and sponsors
 
-[![Sponsors List](https://opencollective.com/Readarr/sponsors.svg?width=890)](https://opencollective.com/readarr#sponsor)
-
-## Mega Sponsors
-
-[![Mega Sponsors List](https://opencollective.com/Readarr/tiers/mega-sponsor.svg?width=890)](https://opencollective.com/readarr#mega-sponsor)
-
-## DigitalOcean
-
-This project is also supported by DigitalOcean
-<p>
-  <a href="https://www.digitalocean.com/">
-    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
-  </a>
-</p>
-
-### License
+## License
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
-* Copyright 2010-2022
+* Copyright 2010-2025
