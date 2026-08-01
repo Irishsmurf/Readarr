@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NLog;
 using NzbDrone.Common.Serializer;
 using Readarr.Http;

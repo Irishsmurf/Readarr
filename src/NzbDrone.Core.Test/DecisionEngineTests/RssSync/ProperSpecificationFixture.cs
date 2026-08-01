@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
-using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Books;
