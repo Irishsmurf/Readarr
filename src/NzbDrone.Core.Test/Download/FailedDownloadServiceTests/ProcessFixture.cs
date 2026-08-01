@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using FizzWare.NBuilder;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;

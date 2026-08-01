@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;

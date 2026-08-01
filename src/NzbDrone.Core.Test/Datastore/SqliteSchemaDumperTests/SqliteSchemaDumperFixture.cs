@@ -1,6 +1,8 @@
 using System.Data;
 using System.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Datastore.Migration.Framework;
 

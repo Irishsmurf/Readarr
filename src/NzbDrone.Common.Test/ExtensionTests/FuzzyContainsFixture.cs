@@ -1,5 +1,7 @@
 using System.Collections.Generic;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Test.Common;

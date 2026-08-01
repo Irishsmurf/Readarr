@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace NzbDrone.Common.Test

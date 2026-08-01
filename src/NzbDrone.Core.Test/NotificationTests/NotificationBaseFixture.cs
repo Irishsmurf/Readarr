@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using FluentValidation.Results;
 using NUnit.Framework;
 using NzbDrone.Core.Books;

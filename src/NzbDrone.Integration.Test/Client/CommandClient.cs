@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using NzbDrone.Core.Messaging.Commands;

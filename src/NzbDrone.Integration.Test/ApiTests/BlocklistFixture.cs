@@ -1,4 +1,6 @@
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using Readarr.Api.V1.Author;
 using Readarr.Api.V1.Blocklist;

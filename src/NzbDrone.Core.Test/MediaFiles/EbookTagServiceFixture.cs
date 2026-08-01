@@ -1,6 +1,8 @@
 using System.Linq;
 using FizzWare.NBuilder;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Test.Framework;

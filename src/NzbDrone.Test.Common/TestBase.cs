@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Threading;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using Moq;
 using NLog;
 using NUnit.Framework;

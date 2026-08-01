@@ -1,5 +1,7 @@
 ﻿using FizzWare.NBuilder;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Authentication;
 using NzbDrone.Core.Housekeeping.Housekeepers;

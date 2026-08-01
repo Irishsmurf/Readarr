@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Books;

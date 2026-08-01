@@ -1,5 +1,7 @@
 using System.Collections.Generic;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;

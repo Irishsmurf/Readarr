@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.IO.Abstractions;
-using FluentAssertions;
+using AwesomeAssertions;
+using FluentAssertions.Execution;
+using AwesomeAssertions;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Test.Common;
