@@ -25,6 +25,18 @@ This repository is a personal fork of that codebase, maintained by [@Irishsmurf]
 
 The official Readarr metadata server is gone, and nothing in this fork replaces it. To have a usable install you need a third-party metadata mirror; the most widely used one is [rreading-glasses](https://github.com/blampe/rreading-glasses). Those mirrors are maintained by other people — this fork is not involved with them and cannot support them. Use them at your own risk.
 
+### Upstream services are off by default
+
+The codebase was wired to three hosts belonging to the retired project. This fork does not contact any of them unless you ask it to:
+
+| What | Default here | How to enable |
+| --- | --- | --- |
+| Crash reporting (`sentry.servarr.com`) | **Off** — upstream's DSNs are gone | Set `READARR__SENTRY_DSN` to your own Sentry DSN |
+| Update checks (`readarr.servarr.com`) | **Off** — no request is made | Set `READARR__SERVICES_URL` to your own update endpoint |
+| Metadata (`api.bookinfo.club`) | Fallback only | Settings → Metadata Source, e.g. an [rreading-glasses](https://github.com/blampe/rreading-glasses) instance |
+
+Crash reports previously went to the Servarr team's Sentry instance, and update checks could only ever offer upstream builds — which lack this fork's fixes, so installing one would quietly undo them. Both now require opting in to infrastructure you control.
+
 ### Branches
 
 * `main` — the primary branch for this fork. Work lands here.
@@ -35,6 +47,9 @@ The official Readarr metadata server is gone, and nothing in this fork replaces 
 Changes made here on top of the final upstream commit (`0b79d30`, "Retirement announcement"):
 
 * **qBittorrent 5.2.0+ login fix** — qBittorrent 5.2.0 changed a successful `POST /api/v2/auth/login` from `200 OK` with the body `Ok.` to `204 No Content` with an empty body. Readarr only accepted the literal `Ok.` body, so every successful login against qBittorrent 5.2.0 or newer was reported as an authentication failure even with correct credentials. Both proxy versions now accept `204 No Content` as success. ([#1](https://github.com/Irishsmurf/Readarr/issues/1), [#2](https://github.com/Irishsmurf/Readarr/pull/2))
+* **Security updates to vulnerable dependencies** — `SixLabors.ImageSharp` 3.1.7 → 3.1.12 ([GHSA-rxmq-m78w-7wmc](https://github.com/advisories/GHSA-rxmq-m78w-7wmc)) and `MailKit` 4.8.0 → 4.17.0 ([GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr)). ImageSharp decodes cover art fetched from third-party metadata mirrors, so it handles untrusted input.
+* **No telemetry to upstream** — crash reporting and update checks no longer contact the retired project's infrastructure. See [Upstream services are off by default](#upstream-services-are-off-by-default).
+* **CI** — every push and pull request builds the app, runs the unit test suite, and builds and smoke-tests the Docker image.
 
 ## Major Features Include
 

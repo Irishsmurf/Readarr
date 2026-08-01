@@ -9,10 +9,12 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource.BookInfo;
 using NzbDrone.Core.Profiles.Metadata;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common.Categories;
 
 namespace NzbDrone.Core.Test.MetadataSource.Goodreads
 {
     [TestFixture]
+    [IntegrationTest]
     [Ignore("Waiting for metadata to be back again", Until = "2026-01-15 00:00:00Z")]
     public class BookInfoProxyFixture : CoreTest<BookInfoProxy>
     {

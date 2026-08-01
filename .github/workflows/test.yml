@@ -1,0 +1,88 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '6.0.427'
+
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build backend and test packages
+        run: ./build.sh --backend -f net6.0 -r linux-x64
+
+      - name: Run unit tests
+        run: |
+          set -euo pipefail
+          tests=_tests/net6.0/linux-x64/publish
+          chmod a+x "$tests/test.sh" "$tests/Readarr.Test.Dummy"
+          cd "$tests"
+          ./test.sh Linux Unit Test
+
+      # test.sh cannot fail: it captures the exit code of `dotnet test` and then
+      # checks `-ge 0`, which is true for every possible exit status, so it always
+      # exits 0. Upstream relied on Azure's NUnit result publisher to fail the
+      # build instead. Without this step a red test run would report as green.
+      - name: Check test results
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import pathlib, sys, xml.etree.ElementTree as ET
+
+          results = sorted(pathlib.Path('.').rglob('TestResult.xml'))
+          if not results:
+              sys.exit('No TestResult.xml produced — the tests did not run.')
+
+          total = failed = errors = 0
+          for path in results:
+              run = ET.parse(path).getroot()
+              total += int(run.get('total', 0))
+              failed += int(run.get('failed', 0))
+              # NUnit reports load/setup problems separately from assertion failures.
+              errors += sum(1 for c in run.iter('test-case') if c.get('result') == 'Error')
+              print(f"{path}: total={run.get('total')} passed={run.get('passed')} "
+                    f"failed={run.get('failed')} skipped={run.get('skipped')}")
+
+          if total == 0:
+              sys.exit('TestResult.xml reports zero tests — treating as a failure.')
+
+          for path in results:
+              for case in ET.parse(path).getroot().iter('test-case'):
+                  if case.get('result') in ('Failed', 'Error'):
+                      message = case.findtext('failure/message', '').strip().splitlines()
+                      print(f"::error title={case.get('fullname')}::"
+                            f"{message[0] if message else 'failed'}")
+
+          if failed or errors:
+              sys.exit(f'{failed} failed, {errors} errored out of {total}.')
+
+          print(f'All {total} tests passed.')
+          PY
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResult.xml'
+          if-no-files-found: warn
+          retention-days: 14
