@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+*(nothing yet)*
+
+---
+
+## [0.4.19.1] - 2026-08-01
+
 ### Fixed
 
 - **[#28]** `System.ArgumentNullException` in `QualityProfileController` when `FormatItems` is `null`
@@ -35,4 +41,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 | **Security** | Security-related changes |
 | **Deprecated** | Soon-to-be removed features |
 
-[Unreleased]: https://github.com/Irishsmurf/Readarr/compare/main...HEAD
+[Unreleased]: https://github.com/Irishsmurf/Readarr/compare/v0.4.19.1...HEAD
+[0.4.19.1]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.19.1
