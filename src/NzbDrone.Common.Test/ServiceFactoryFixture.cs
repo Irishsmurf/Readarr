@@ -1,9 +1,9 @@
 using System.Linq;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;

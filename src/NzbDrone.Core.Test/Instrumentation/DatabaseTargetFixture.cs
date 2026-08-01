@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NLog;
 using NUnit.Framework;
 using NzbDrone.Common.Instrumentation;

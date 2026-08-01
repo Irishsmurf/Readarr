@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using Mono.Unix;
 using NUnit.Framework;
 using NzbDrone.Mono.Disk;

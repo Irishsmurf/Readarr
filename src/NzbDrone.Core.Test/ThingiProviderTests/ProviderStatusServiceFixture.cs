@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using Moq;
 using NLog;
 using NUnit.Framework;

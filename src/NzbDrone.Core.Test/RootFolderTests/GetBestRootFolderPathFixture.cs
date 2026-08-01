@@ -1,7 +1,7 @@
 using System.Linq;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;

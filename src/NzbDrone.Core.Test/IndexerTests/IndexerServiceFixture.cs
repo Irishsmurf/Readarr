@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using FizzWare.NBuilder;
-using AwesomeAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
-using AwesomeAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Indexers.FileList;
