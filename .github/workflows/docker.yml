@@ -17,6 +17,11 @@ env:
   NODE_VERSION: '20.x'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Image tags and the reported application version are built from this plus the
+  # run number. It used to be read out of azure-pipelines.yml, which was the last
+  # thing keeping that file alive; the value is carried over unchanged from the
+  # final upstream build so versions do not appear to go backwards.
+  MAJOR_VERSION: '0.4.19'
 
 jobs:
   build:
@@ -43,10 +48,7 @@ jobs:
       - name: Derive version
         id: version
         run: |
-          # Single source of truth for the version, so this does not drift from
-          # the value upstream's pipeline used.
-          major=$(grep -oP "majorVersion: '\K[^']+" azure-pipelines.yml)
-          echo "version=${major}.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "version=${MAJOR_VERSION}.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Build backend, frontend and packages
         env:
