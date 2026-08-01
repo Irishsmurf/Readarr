@@ -93,14 +93,48 @@ jobs:
           retention-days: 14
 
 # ─────────────────────────────────────────────────────────────────────────────
-# JOB 2 — Build release binaries for all supported platforms
+# JOB 2 — Build the frontend once and upload it as a workflow artifact.
+#
+# Matrix jobs all start simultaneously on separate runners, so we cannot rely
+# on one leg saving a GHA cache and another reading it — the restore runs
+# before the save, so it always misses. We build the UI once here, upload it,
+# and every matrix leg downloads it after its backend build (because
+# build.sh --backend wipes _output/ before the matrix leg can use it).
+# ─────────────────────────────────────────────────────────────────────────────
+  build-frontend:
+    name: Build frontend
+    runs-on: ubuntu-24.04
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Build frontend
+        run: ./build.sh --frontend
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-ui
+          path: _output/UI
+          retention-days: 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 3 — Build release binaries for all supported platforms
 # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build binaries
     runs-on: ubuntu-24.04
-    needs: test
+    needs: build-frontend
 
     strategy:
+      fail-fast: false   # let other platforms finish even if one fails
       matrix:
         include:
           - rid: linux-x64
@@ -124,11 +158,8 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Set up Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+      # Node is not needed here — the frontend is built in build-frontend
+      # and downloaded after the backend build below.
 
       - name: Derive version
         id: version
@@ -149,23 +180,13 @@ jobs:
           READARRVERSION: ${{ steps.version.outputs.version }}
         run: ./build.sh --backend -f net10.0 -r ${{ matrix.rid }}
 
-      - name: Build frontend (once — x64 linux only)
-        if: matrix.rid == 'linux-x64'
-        run: ./build.sh --frontend
-
-      - name: Restore cached frontend (non-x64 builds)
-        if: matrix.rid != 'linux-x64'
-        uses: actions/cache@v4
+      # Restore the pre-built frontend AFTER the backend build, because
+      # build.sh --backend clears _output/ at startup.
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v7
         with:
+          name: frontend-ui
           path: _output/UI
-          key: frontend-${{ github.sha }}
-
-      - name: Cache frontend output (x64 build)
-        if: matrix.rid == 'linux-x64'
-        uses: actions/cache@v4
-        with:
-          path: _output/UI
-          key: frontend-${{ github.sha }}
 
       - name: Package
         env:
@@ -201,7 +222,7 @@ jobs:
           retention-days: 7
 
 # ─────────────────────────────────────────────────────────────────────────────
-# JOB 3 — Publish GitHub Release
+# JOB 4 — Publish GitHub Release
 # ─────────────────────────────────────────────────────────────────────────────
   release:
     name: Publish GitHub Release
