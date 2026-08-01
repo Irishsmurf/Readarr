@@ -1,0 +1,295 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v0.4.19.1). Must already exist on main.'
+        required: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  MAJOR_VERSION: '0.4.19'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 1 — Tests (must pass before anything is published)
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build backend and test packages
+        run: ./build.sh --backend -f net10.0 -r linux-x64
+
+      - name: Run unit tests
+        run: |
+          set -euo pipefail
+          tests=_tests/net10.0/linux-x64/publish
+          chmod a+x "$tests/test.sh" "$tests/Readarr.Test.Dummy"
+          cd "$tests"
+          ./test.sh Linux Unit Test
+
+      - name: Check test results
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import pathlib, sys, xml.etree.ElementTree as ET
+
+          results = sorted(pathlib.Path('.').rglob('TestResult.xml'))
+          if not results:
+              sys.exit('No TestResult.xml produced — the tests did not run.')
+
+          total = failed = errors = 0
+          for path in results:
+              run = ET.parse(path).getroot()
+              total += int(run.get('total', 0))
+              failed += int(run.get('failed', 0))
+              errors += sum(1 for c in run.iter('test-case') if c.get('result') == 'Error')
+              print(f"{path}: total={run.get('total')} passed={run.get('passed')} "
+                    f"failed={run.get('failed')} skipped={run.get('skipped')}")
+
+          if total == 0:
+              sys.exit('TestResult.xml reports zero tests — treating as a failure.')
+
+          for path in results:
+              for case in ET.parse(path).getroot().iter('test-case'):
+                  if case.get('result') in ('Failed', 'Error'):
+                      message = case.findtext('failure/message', '').strip().splitlines()
+                      print(f"::error title={case.get('fullname')}::"
+                            f"{message[0] if message else 'failed'}")
+
+          if failed or errors:
+              sys.exit(f'{failed} failed, {errors} errored out of {total}.')
+
+          print(f'All {total} tests passed.')
+          PY
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResult.xml'
+          if-no-files-found: warn
+          retention-days: 14
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 2 — Build release binaries for all supported platforms
+# ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build binaries
+    runs-on: ubuntu-22.04
+    needs: test
+
+    strategy:
+      matrix:
+        include:
+          - rid: linux-x64
+            arch: x64
+          - rid: linux-arm64
+            arch: arm64
+          - rid: linux-arm
+            arch: arm
+          - rid: win-x64
+            arch: win-x64
+          - rid: osx-x64
+            arch: osx-x64
+          - rid: osx-arm64
+            arch: osx-arm64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Derive version
+        id: version
+        run: |
+          # Use the tag name if triggered by a tag push; fall back to the
+          # manually supplied input when triggered via workflow_dispatch.
+          TAG="${{ github.ref_name }}"
+          if [[ "$TAG" == refs/* ]]; then
+            TAG="${{ github.event.inputs.tag }}"
+          fi
+          # Strip leading 'v' to get a plain semver for the build
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build backend
+        env:
+          READARRVERSION: ${{ steps.version.outputs.version }}
+        run: ./build.sh --backend -f net10.0 -r ${{ matrix.rid }}
+
+      - name: Build frontend (once — x64 linux only)
+        if: matrix.rid == 'linux-x64'
+        run: ./build.sh --frontend
+
+      - name: Restore cached frontend (non-x64 builds)
+        if: matrix.rid != 'linux-x64'
+        uses: actions/cache@v4
+        with:
+          path: _output/UI
+          key: frontend-${{ github.sha }}
+
+      - name: Cache frontend output (x64 build)
+        if: matrix.rid == 'linux-x64'
+        uses: actions/cache@v4
+        with:
+          path: _output/UI
+          key: frontend-${{ github.sha }}
+
+      - name: Package
+        env:
+          READARRVERSION: ${{ steps.version.outputs.version }}
+        run: ./build.sh --packages -f net10.0 -r ${{ matrix.rid }}
+
+      - name: Create archive
+        id: archive
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          RID="${{ matrix.rid }}"
+          ARCH="${{ matrix.arch }}"
+          SRC="_artifacts/${RID}/net10.0/Readarr"
+
+          # Drop the in-app updater so it can't pull an upstream build
+          rm -rf "${SRC}/Readarr.Update"
+
+          ARCHIVE_NAME="Readarr.${VERSION}.${ARCH}"
+          if [[ "$RID" == win-* ]]; then
+            zip -r "${ARCHIVE_NAME}.zip" "$SRC"
+            echo "path=${ARCHIVE_NAME}.zip" >> "$GITHUB_OUTPUT"
+          else
+            tar -czf "${ARCHIVE_NAME}.tar.gz" -C "$(dirname "$SRC")" "$(basename "$SRC")"
+            echo "path=${ARCHIVE_NAME}.tar.gz" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: readarr-${{ matrix.arch }}
+          path: ${{ steps.archive.outputs.path }}
+          retention-days: 7
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 3 — Publish GitHub Release
+# ─────────────────────────────────────────────────────────────────────────────
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-22.04
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive version
+        id: version
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ "$TAG" == refs/* ]]; then
+            TAG="${{ github.event.inputs.tag }}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Extract release notes from CHANGELIST.md
+        id: notes
+        run: |
+          python3 - <<'PY'
+          import re, os, sys
+
+          tag = os.environ["TAG"]
+          version = tag.lstrip("v")
+
+          text = open("CHANGELIST.md").read()
+
+          # Try to find the section matching this specific version
+          pattern = rf'## \[{re.escape(version)}\].*?\n(.*?)(?=\n## \[|\Z)'
+          m = re.search(pattern, text, re.DOTALL)
+
+          if not m:
+              # Fall back to [Unreleased] section
+              m = re.search(r'## \[Unreleased\]\n(.*?)(?=\n## \[|\Z)', text, re.DOTALL)
+
+          notes = m.group(1).strip() if m else "See [CHANGELIST.md](./CHANGELIST.md) for details."
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              # GitHub output supports multiline via heredoc delimiter
+              delimiter = "NOTES_EOF"
+              f.write(f"notes<<{delimiter}\n{notes}\n{delimiter}\n")
+
+          PY
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: readarr-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd release-assets
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Readarr ${{ steps.version.outputs.version }}
+          body: |
+            ## What's changed
+
+            ${{ steps.notes.outputs.notes }}
+
+            ---
+
+            ### Docker
+
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+            ```
+
+            ### Checksums
+
+            See `SHA256SUMS.txt` attached below.
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag, '-') }}
+          files: |
+            release-assets/*
+          generate_release_notes: false
