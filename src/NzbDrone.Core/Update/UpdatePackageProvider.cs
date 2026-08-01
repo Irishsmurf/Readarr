@@ -18,6 +18,7 @@ namespace NzbDrone.Core.Update
     public class UpdatePackageProvider : IUpdatePackageProvider
     {
         private readonly IHttpClient _httpClient;
+        private readonly IReadarrCloudRequestBuilder _cloudRequestBuilder;
         private readonly IHttpRequestBuilderFactory _requestBuilder;
         private readonly IPlatformInfo _platformInfo;
         private readonly IAnalyticsService _analyticsService;
@@ -27,6 +28,7 @@ namespace NzbDrone.Core.Update
         {
             _platformInfo = platformInfo;
             _analyticsService = analyticsService;
+            _cloudRequestBuilder = requestBuilder;
             _requestBuilder = requestBuilder.Services;
             _httpClient = httpClient;
             _mainDatabase = mainDatabase;
@@ -34,6 +36,11 @@ namespace NzbDrone.Core.Update
 
         public UpdatePackage GetLatestUpdate(string branch, Version currentVersion)
         {
+            if (!_cloudRequestBuilder.ServicesConfigured)
+            {
+                return null;
+            }
+
             var request = _requestBuilder.Create()
                                          .Resource("/update/{branch}")
                                          .AddQueryParam("version", currentVersion)
@@ -63,6 +70,11 @@ namespace NzbDrone.Core.Update
 
         public List<UpdatePackage> GetRecentUpdates(string branch, Version currentVersion, Version previousVersion)
         {
+            if (!_cloudRequestBuilder.ServicesConfigured)
+            {
+                return new List<UpdatePackage>();
+            }
+
             var request = _requestBuilder.Create()
                                          .Resource("/update/{branch}/changes")
                                          .AddQueryParam("version", currentVersion)

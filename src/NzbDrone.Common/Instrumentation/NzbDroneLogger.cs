@@ -12,6 +12,8 @@ namespace NzbDrone.Common.Instrumentation
 {
     public static class NzbDroneLogger
     {
+        public const string SentryDsnEnvironmentVariable = "READARR__SENTRY_DSN";
+
         private const string FILE_LOG_LAYOUT = @"${date:format=yyyy-MM-dd HH\:mm\:ss.f}|${level}|${logger}|${message}${onexception:inner=${newline}${newline}[v${assembly-version}] ${exception:format=ToString}${newline}${exception:format=Data}${newline}}";
 
         private static bool _isConfigured;
@@ -64,17 +66,15 @@ namespace NzbDrone.Common.Instrumentation
 
         private static void RegisterSentry(bool updateClient, IAppFolderInfo appFolderInfo)
         {
-            string dsn;
+            // The upstream DSNs posted crash reports, including log context, to the
+            // retired project's Sentry instance. A fork should not be sending anyone
+            // else's diagnostics there, so reporting is off unless the operator opts
+            // in by pointing this at a Sentry instance of their own.
+            var dsn = Environment.GetEnvironmentVariable(SentryDsnEnvironmentVariable);
 
-            if (updateClient)
+            if (dsn.IsNullOrWhiteSpace())
             {
-                dsn = "https://a48936ded03b483bbba2ab52fa70de04@sentry.servarr.com/5";
-            }
-            else
-            {
-                dsn = RuntimeInfo.IsProduction
-                    ? "https://19c3bc46b87a470ba0f91430c4c0a68d@sentry.servarr.com/3"
-                    : "https://31e00a6c63ea42c8b5fe70358526a30d@sentry.servarr.com/4";
+                return;
             }
 
             var target = new SentryTarget(dsn, appFolderInfo)
