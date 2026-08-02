@@ -62,6 +62,7 @@ namespace Readarr.Http.Authentication
                             {
                                 ctx.Response.Redirect(ctx.RedirectUri);
                             }
+
                             return Task.CompletedTask;
                         },
                         OnRedirectToAccessDenied = ctx =>
@@ -74,6 +75,7 @@ namespace Readarr.Http.Authentication
                             {
                                 ctx.Response.Redirect(ctx.RedirectUri);
                             }
+
                             return Task.CompletedTask;
                         }
                     };
