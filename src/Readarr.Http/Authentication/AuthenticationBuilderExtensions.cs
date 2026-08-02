@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Diacritical;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -49,6 +50,33 @@ namespace Readarr.Http.Authentication
                     options.ExpireTimeSpan = TimeSpan.FromDays(7);
                     options.SlidingExpiration = true;
                     options.ReturnUrlParameter = "returnUrl";
+                    options.Events = new CookieAuthenticationEvents
+                    {
+                        OnRedirectToLogin = ctx =>
+                        {
+                            if (ctx.Request.Path.StartsWithSegments("/api"))
+                            {
+                                ctx.Response.StatusCode = 401;
+                            }
+                            else
+                            {
+                                ctx.Response.Redirect(ctx.RedirectUri);
+                            }
+                            return Task.CompletedTask;
+                        },
+                        OnRedirectToAccessDenied = ctx =>
+                        {
+                            if (ctx.Request.Path.StartsWithSegments("/api"))
+                            {
+                                ctx.Response.StatusCode = 403;
+                            }
+                            else
+                            {
+                                ctx.Response.Redirect(ctx.RedirectUri);
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             return services.AddAuthentication()
