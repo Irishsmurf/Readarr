@@ -44,8 +44,8 @@ namespace Readarr.Http.Authentication
                     instanceName = CookieNameRegex.Replace(instanceName, string.Empty);
 
                     options.Cookie.Name = $"{instanceName}Auth";
-                    options.AccessDeniedPath = "/login?loginFailed=true";
-                    options.LoginPath = "/login";
+                    options.AccessDeniedPath = $"{configFileProvider.UrlBase}/login?loginFailed=true";
+                    options.LoginPath = $"{configFileProvider.UrlBase}/login";
                     options.ExpireTimeSpan = TimeSpan.FromDays(7);
                     options.SlidingExpiration = true;
                     options.ReturnUrlParameter = "returnUrl";
