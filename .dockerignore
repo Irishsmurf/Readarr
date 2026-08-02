@@ -1,0 +1,5 @@
+# The image is built from prebuilt output staged into docker/, so the build
+# context only needs that directory. Everything else — src, node_modules,
+# _output, _artifacts — would just be uploaded to the daemon and ignored.
+*
+!docker

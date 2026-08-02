@@ -8,6 +8,16 @@
 
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+
+    <!--
+        Publish framework-dependent. This was the behaviour on .NET 6 too, but it
+        was never written down: the SDK derives SelfContained from whether a RID
+        is set, and PublishAllRids.targets always sets one. State it, so the
+        published layout does not quietly change with a future SDK.
+        The image relies on this - it ships on dotnet/aspnet rather than carrying
+        a runtime of its own.
+    -->
+    <SelfContained>false</SelfContained>
     <RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64;linux-x64;linux-musl-x64;linux-arm;linux-musl-arm;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
 
     <ReadarrRootDir>$(MSBuildThisFileDirectory)..\</ReadarrRootDir>
@@ -38,6 +48,31 @@
     -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <!--
+      NuGet audit findings that are known and currently unfixable, suppressed one
+      advisory at a time. NU1901-NU1904 used to sit in WarningsNotAsErrors, which
+      silenced every advisory including ones nobody had looked at. These entries
+      keep the audit failing the build for anything new while naming what is
+      already understood.
+
+      All three come from one place. Servarr.FluentMigrator.Runner is a
+      meta-package that drags in every database provider FluentMigrator supports,
+      including SqlServer, whose Microsoft.Data.SqlClient 2.1.2 brings the
+      IdentityModel pair and - via ConfigurationManager and Security.Permissions -
+      System.Drawing.Common. Readarr talks to SQLite and Postgres only and already
+      references those two providers directly, so dropping the meta-package should
+      remove all of this. That touches migrations, so it wants its own change and
+      its own smoke test rather than riding along here.
+  -->
+  <ItemGroup>
+    <!-- Microsoft.Data.SqlClient 2.1.2 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-98g6-xh36-x2p7" />
+    <!-- Microsoft.IdentityModel.JsonWebTokens and System.IdentityModel.Tokens.Jwt 6.8.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-59j7-ghrg-fj52" />
+    <!-- System.Drawing.Common 4.7.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rxg9-xrhp-64gj" />
+  </ItemGroup>
 
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
@@ -98,13 +133,6 @@
     <!-- For now keep the NzbDrone namespace -->
     <RootNamespace Condition="'$(ReadarrProject)'=='true'">$(MSBuildProjectName.Replace('Readarr','NzbDrone'))</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(TestProject)'!='true'">
-    <!-- Annotates .NET assemblies with repository information including SHA -->
-    <!-- Sentry uses this to link directly to GitHub at the exact version/file/line -->
-    <!-- This is built-in on .NET 8 and can be removed once the project is updated -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" />
-  </ItemGroup>
 
   <!-- Sentry specific configuration: Only in Release mode -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

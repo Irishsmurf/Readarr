@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NLog.Extensions.Logging;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Instrumentation;
@@ -59,7 +59,7 @@ namespace NzbDrone.Host
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-                options.KnownNetworks.Clear();
+                options.KnownIPNetworks.Clear();
                 options.KnownProxies.Clear();
             });
 
@@ -105,7 +105,7 @@ namespace NzbDrone.Host
                     License = new OpenApiLicense
                     {
                         Name = "GPL-3.0",
-                        Url = new Uri("https://github.com/Readarr/Readarr/blob/develop/LICENSE.md")
+                        Url = new Uri("https://github.com/Irishsmurf/Readarr/blob/develop/LICENSE.md")
                     }
                 });
 
@@ -116,18 +116,13 @@ namespace NzbDrone.Host
                     Scheme = "apiKey",
                     Description = "Apikey passed as header",
                     In = ParameterLocation.Header,
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "X-Api-Key"
-                    },
                 };
 
                 c.AddSecurityDefinition("X-Api-Key", apiKeyHeader);
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
                 {
-                    { apiKeyHeader, Array.Empty<string>() }
+                    { new OpenApiSecuritySchemeReference("X-Api-Key"), new List<string>() }
                 });
 
                 var apikeyQuery = new OpenApiSecurityScheme
@@ -137,11 +132,6 @@ namespace NzbDrone.Host
                     Scheme = "apiKey",
                     Description = "Apikey passed as query parameter",
                     In = ParameterLocation.Query,
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "apikey"
-                    },
                 };
 
                 c.AddServer(new OpenApiServer
@@ -156,9 +146,9 @@ namespace NzbDrone.Host
 
                 c.AddSecurityDefinition("apikey", apikeyQuery);
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
                 {
-                    { apikeyQuery, Array.Empty<string>() }
+                    { new OpenApiSecuritySchemeReference("apikey"), new List<string>() }
                 });
 
                 c.DescribeAllParametersInCamelCase();

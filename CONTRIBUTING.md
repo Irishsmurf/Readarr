@@ -1,13 +1,19 @@
 # How to Contribute
 
-We're always looking for people to help make Readarr even better, there are a number of ways to contribute.
-
-This file has been moved to the wiki for the latest details please see the [contributing wiki page](https://wiki.servarr.com/readarr/contributing).
+This is a personally maintained fork of Readarr. Contributions, bug reports,
+and feature requests are welcome via
+[GitHub Issues](https://github.com/Irishsmurf/Readarr/issues) and
+[Pull Requests](https://github.com/Irishsmurf/Readarr/pulls) on this
+repository.
 
 ## Documentation
 
-Setup guides, [FAQ](https://wiki.servarr.com/readarr/faq), the more information we have on the [wiki](https://wiki.servarr.com/readarr) the better.
+General Readarr setup guides and the [FAQ](https://wiki.servarr.com/readarr/faq)
+on the upstream [wiki](https://wiki.servarr.com/readarr) still apply and are a
+useful reference. Fork-specific changes are documented in
+[CHANGELIST.md](./CHANGELIST.md).
 
 ## Development
 
-See the [Wiki Page](https://wiki.servarr.com/readarr/contributing)
+Build and test instructions are in [README.md](./README.md). Open a pull
+request against this repository with your changes.

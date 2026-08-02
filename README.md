@@ -1,96 +1,192 @@
-# Announcement: Retirement of Readarr
+<div align="center">
 
-We would like to announce that the [Readarr project](<https://github.com/Readarr/Readarr>) has been retired. This difficult decision was made due to a combination of factors: the project's metadata has become unusable, we no longer have the time to remake or repair it, and the community effort to transition to using Open Library as the source has stalled without much progress.
+<img src="Logo/Readarr.svg" width="200" alt="Readarr Logo" />
 
-Third-party metadata mirrors exist, but as we're not involved with them at all, we cannot provide support for them. Use of them is entirely at your own risk. The most popular mirror appears to be [rreading-glasses](<https://github.com/blampe/rreading-glasses>).
+# Readarr — Community Fork
 
-Without anyone to take over Readarr development, we expect it to wither away, so we still encourage you to seek alternatives to Readarr.
+**Book manager and automation for your ebook and audiobook library.**
+A community-maintained fork of the retired [Readarr](https://github.com/Readarr/Readarr) project.
 
-## Key Points:
-- **Effective Immediately**: The retirement takes effect immediately. Please stay tuned for any possible further communications.
-- **Support Window**: We will provide support during a brief transition period to help with troubleshooting non metadata related issues.
-- **Alternative Solutions**: Users are encouraged to explore and adopt any other possible solutions as alternatives to Readarr.
-- **Opportunities for Revival**: We are open to someone taking over and revitalizing the project. If you are interested, please get in touch.
-- **Gratitude**: We extend our deepest gratitude to all the contributors and community members who supported Readarr over the years.
+[![Tests](https://github.com/Irishsmurf/Readarr/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Irishsmurf/Readarr/actions/workflows/test.yml)
+[![Docker](https://github.com/Irishsmurf/Readarr/actions/workflows/docker.yml/badge.svg?branch=main)](https://github.com/Irishsmurf/Readarr/actions/workflows/docker.yml)
+[![Release](https://github.com/Irishsmurf/Readarr/actions/workflows/release.yml/badge.svg)](https://github.com/Irishsmurf/Readarr/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Irishsmurf/Readarr?include_prereleases&label=latest)](https://github.com/Irishsmurf/Readarr/releases/latest)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE.md)
 
-Thank you for being part of the Readarr journey. For any inquiries or assistance during this transition, please contact our team.
+<img src="frontend/src/Content/Images/poster-dark.png" alt="Readarr poster" height="160" />
 
-Sincerely,  
-The Servarr Team
+</div>
 
-# Readarr
+---
 
-[![Build Status](https://dev.azure.com/Readarr/Readarr/_apis/build/status/Readarr.Readarr?branchName=develop)](https://dev.azure.com/Readarr/Readarr/_build/latest?definitionId=1&branchName=develop)
-[![Translated](https://translate.servarr.com/widgets/servarr/-/readarr/svg-badge.svg)](https://translate.servarr.com/engage/readarr/?utm_source=widget)
-[![Docker Pulls](https://img.shields.io/docker/pulls/hotio/readarr)](https://wiki.servarr.com/readarr/installation#docker)
-[![Donors on Open Collective](https://opencollective.com/Readarr/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/Readarr/sponsors/badge.svg)](#sponsors)
-[![Mega Sponsors on Open Collective](https://opencollective.com/Readarr/megasponsors/badge.svg)](#mega-sponsors)
+> [!IMPORTANT]
+> Upstream Readarr was **officially retired on June 27, 2025** by the Servarr team.
+> This fork carries forward security updates and bug fixes. It is **not affiliated with
+> the Servarr team** — please don't ask them to support anything here.
 
-### Readarr is currently in beta testing and is generally still in a work in progress. Features may be broken, incomplete, or cause spontaneous combustion
+---
 
-Readarr is an ebook and audiobook collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new books from your favorite authors and will grab, sort, and rename them.
-Note that only one type of a given book is supported. If you want both an audiobook and ebook of a given book you will need multiple instances.
+## ✨ What This Fork Adds
 
-## Major Features Include
+All changes on top of the final upstream commit (`0b79d30` — "Retirement announcement"):
 
-* Can watch for better quality of the ebooks and audiobooks you have and do an automatic upgrade. *e.g. from PDF to AZW3*
-* Support for major platforms: Windows, Linux, macOS, Raspberry Pi, etc.
-* Automatically detects new books
-* Can scan your existing library and download any missing books
-* Automatic failed download handling will try another release if one fails
-* Manual search so you can pick any release or to see why a release was not downloaded automatically
-* Advanced customization for profiles, such that Readarr will always download the copy you want
-* Fully configurable book renaming
-* SABnzbd, NZBGet, QBittorrent, Deluge, rTorrent, Transmission, uTorrent, and other download clients are supported and integrated
-* Full integration with Calibre (add to library, conversion) (Requires Calibre Content Server)
-* And a beautiful UI
+| Change | Details |
+|--------|---------|
+| 🐛 **qBittorrent 5.2.0+ login fix** | qBit changed a successful auth response from `200 Ok.` to `204 No Content`. Readarr only accepted the literal body, so every login against qBit 5.2.0+ was reported as an auth failure. ([#1](https://github.com/Irishsmurf/Readarr/issues/1), [#2](https://github.com/Irishsmurf/Readarr/pull/2)) |
+| 🔒 **ImageSharp security update** | `SixLabors.ImageSharp` 3.1.7 → 3.1.12 ([GHSA-rxmq-m78w-7wmc](https://github.com/advisories/GHSA-rxmq-m78w-7wmc)). ImageSharp decodes cover art from third-party mirrors — untrusted input. Also `MailKit` 4.8.0 → 4.17.0 ([GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr)). ([#9](https://github.com/Irishsmurf/Readarr/issues/9)) |
+| ⚡ **.NET 10** | All projects now target `net10.0`. .NET 6 reached end-of-life in November 2024 and no longer receives security patches. ([#10](https://github.com/Irishsmurf/Readarr/issues/10)) |
+| 🔕 **No upstream telemetry** | Crash reporting and update checks no longer contact the retired project's infrastructure. Both require explicit opt-in. |
+| 🐛 **Quality Profile null fix** | `ArgumentNullException` when `FormatItems` was null in the validator — now returns a user-friendly error instead of a 500. ([#28](https://github.com/Irishsmurf/Readarr/issues/28), [#29](https://github.com/Irishsmurf/Readarr/pull/29)) |
+| 🚀 **CI/CD overhaul** | Tests on every PR; Docker images only on `main` and release tags; automated multi-platform GitHub Releases. |
 
-## Support
+See [CHANGELIST.md](CHANGELIST.md) for the full versioned history.
 
-[![Wiki](https://img.shields.io/badge/servarr-wiki-181717.svg?maxAge=60)](https://wiki.servarr.com/readarr)
-[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://readarr.com/discord)
+---
 
-Note: GitHub Issues are for Bugs and Feature Requests Only
+## 🚀 Quick Start
 
-[![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Readarr/Readarr/issues)
+### Docker (recommended)
 
-## Contributors & Developers
+Multi-arch images (`linux/amd64`, `linux/arm64`) are published to GHCR:
 
-[API Documentation](https://readarr.com/docs/api/)
+```bash
+docker pull ghcr.io/irishsmurf/readarr:latest
+```
 
-This project exists thanks to all the people who contribute.
-- [Contribute (GitHub)](CONTRIBUTING.md)
-- [Contribution (Wiki Article)](https://wiki.servarr.com/readarr/contributing)
+**Docker Compose:**
 
-[![Contributors List](https://opencollective.com/Readarr/contributors.svg?width=890&button=false)](https://github.com/Readarr/Readarr/graphs/contributors)
+```yaml
+services:
+  readarr:
+    image: ghcr.io/irishsmurf/readarr:latest
+    container_name: readarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /path/to/config:/config
+      - /path/to/books:/books
+      - /path/to/downloads:/downloads
+    ports:
+      - 8787:8787
+    restart: unless-stopped
+```
 
-## Backers
+The image follows linuxserver.io conventions (`PUID`, `PGID`, `UMASK`, config at `/config`, port `8787`), so an existing LSIO compose file works with only the image line changed.
 
-Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/Readarr#backer)
+> [!WARNING]
+> **The in-app updater is removed.** It would download an upstream build and silently undo this fork's fixes. Update by pulling a new image tag instead.
 
-[![Backers List](https://opencollective.com/Readarr/backers.svg?width=890)](https://opencollective.com/Readarr#backer)
+> [!TIP]
+> **Back up `/config/readarr.db` before your first switch.** There are no schema migrations between 0.4.18 and current `main`, so rolling back works — but a backup costs nothing.
 
-## Sponsors
+### Image Tags
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/readarr#sponsor)
+| Tag | When it updates |
+|-----|----------------|
+| `latest` | Every push to `main` |
+| `0.4.19.1` | Pinned release tag (recommended for production) |
+| `sha-<short>` | Exact commit — maximum reproducibility |
 
-[![Sponsors List](https://opencollective.com/Readarr/sponsors.svg?width=890)](https://opencollective.com/readarr#sponsor)
+---
 
-## Mega Sponsors
+## ⚙️ Upstream Services
 
-[![Mega Sponsors List](https://opencollective.com/Readarr/tiers/mega-sponsor.svg?width=890)](https://opencollective.com/readarr#mega-sponsor)
+The codebase was wired to three hosts belonging to the retired project. This fork does not contact any of them unless you explicitly opt in:
 
-## DigitalOcean
+| Service | Default | How to enable |
+|---------|---------|---------------|
+| Crash reporting (`sentry.servarr.com`) | **Off** — upstream DSNs are gone | Set `READARR__SENTRY_DSN` to your own Sentry DSN |
+| Update checks (`readarr.servarr.com`) | **Off** — no request made | Set `READARR__SERVICES_URL` to your own update endpoint |
+| Metadata (`api.bookinfo.club`) | Fallback only | Settings → Metadata Source |
 
-This project is also supported by DigitalOcean
-<p>
-  <a href="https://www.digitalocean.com/">
-    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
-  </a>
-</p>
+### You still need a metadata mirror
 
-### License
+The official Readarr metadata server is gone and nothing in this fork replaces it. The most widely used third-party mirror is **[rreading-glasses](https://github.com/blampe/rreading-glasses)**. It is maintained by other people — this fork is not involved and cannot support it. Use it at your own risk.
 
-* [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
-* Copyright 2010-2022
+---
+
+## 🔨 Building from Source
+
+**Requirements:**
+- .NET SDK 10.0
+- Node.js 20 and Yarn 1.x
+
+```bash
+git clone https://github.com/Irishsmurf/Readarr.git
+cd Readarr
+yarn install
+./build.sh --backend --frontend --packages
+```
+
+Packaged output lands in `_artifacts/<rid>/net10.0/Readarr/`. Run tests with `./test.sh`.
+
+> [!NOTE]
+> `--backend` clears `_output/` at the start of every run, so it must come before `--frontend`.
+> The ordering above is deliberate.
+
+**Build the Docker image locally:**
+
+```bash
+mkdir -p docker/artifacts/amd64
+cp -r _artifacts/linux-x64/net10.0/Readarr/. docker/artifacts/amd64/
+rm -rf docker/artifacts/amd64/Readarr.Update
+docker build -t readarr:local .
+```
+
+---
+
+## 🌟 Features
+
+<div align="center">
+<img src="frontend/src/Content/Images/poster-dark-square.png" alt="Readarr UI" height="180" />
+</div>
+
+- 📖 **Automatic upgrades** — watches for better quality editions and upgrades automatically *(e.g. PDF → AZW3)*
+- 🔍 **Library scanning** — scans your existing library and downloads missing books
+- 📡 **Indexer support** — Newznab, Torznab, and more
+- ⬇️ **Download client integration** — SABnzbd, NZBGet, qBittorrent, Deluge, rTorrent, Transmission, uTorrent
+- 📚 **Calibre integration** — add to library and convert formats *(requires Calibre Content Server)*
+- 🔁 **Automatic failed download handling** — tries another release if one fails
+- 🎛️ **Advanced quality profiles** — always get the copy you want
+- ✏️ **Fully configurable renaming**
+- 🌍 **Cross-platform** — Windows, Linux, macOS, Raspberry Pi
+
+---
+
+## 🤝 Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Primary branch — all work lands here |
+| `develop` | Retained to align with upstream's original layout and history |
+
+---
+
+## 📚 Documentation & Support
+
+The upstream documentation still applies to the application itself (excluding anything about official metadata or official support):
+
+- [Servarr Wiki (Readarr)](https://wiki.servarr.com/readarr) — setup and configuration reference
+- [API documentation](https://readarr.com/docs/api/)
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+
+Support for **this fork** is via [GitHub Issues](https://github.com/Irishsmurf/Readarr/issues) only.
+The Servarr Discord does not support this fork.
+
+---
+
+## 🙏 Credits
+
+All of the real work here was done by the Readarr and Servarr teams, their contributors, and the Sonarr project this codebase descends from. This fork is a thin maintenance layer on top of many years of other people's work.
+
+- [Upstream contributors](https://github.com/Readarr/Readarr/graphs/contributors)
+- [Readarr on Open Collective](https://opencollective.com/Readarr) — upstream's backers and sponsors
+
+---
+
+## 📄 License
+
+[GNU GPL v3](LICENSE.md) — Copyright 2010-2025

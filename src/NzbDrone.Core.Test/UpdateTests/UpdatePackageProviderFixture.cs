@@ -1,9 +1,9 @@
 using System;
-using System.Linq;
 using FluentAssertions;
+using Moq;
 using NUnit.Framework;
-using NzbDrone.Common.EnvironmentInfo;
-using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Cloud;
+using NzbDrone.Common.Http;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Core.Update;
 
@@ -11,48 +11,39 @@ namespace NzbDrone.Core.Test.UpdateTests
 {
     public class UpdatePackageProviderFixture : CoreTest<UpdatePackageProvider>
     {
+        // These used to call the live upstream update service over real HTTP. That
+        // service belongs to the retired project and can only ever offer upstream
+        // builds, so this fork does not talk to it unless an operator configures
+        // their own endpoint. What matters now is that nothing is requested, and
+        // that no call goes out, when none is configured.
         [SetUp]
         public void Setup()
         {
-            Mocker.GetMock<IPlatformInfo>().SetupGet(c => c.Version).Returns(new Version("9.9.9"));
+            Mocker.GetMock<IReadarrCloudRequestBuilder>()
+                  .SetupGet(c => c.ServicesConfigured)
+                  .Returns(false);
         }
 
         [Test]
-        public void no_update_when_version_higher()
+        public void should_not_offer_an_update_when_no_update_service_is_configured()
         {
-            UseRealHttp();
-            Subject.GetLatestUpdate("develop", new Version(10, 0)).Should().BeNull();
+            Subject.GetLatestUpdate("main", new Version(0, 1)).Should().BeNull();
         }
 
         [Test]
-        public void finds_update_when_version_lower()
+        public void should_return_no_recent_updates_when_no_update_service_is_configured()
         {
-            UseRealHttp();
-            Subject.GetLatestUpdate("develop", new Version(0, 1)).Should().NotBeNull();
+            Subject.GetRecentUpdates("main", new Version(0, 1), null).Should().BeEmpty();
         }
 
         [Test]
-        [Ignore("Ignore until we actually release something on Master")]
-        public void should_get_master_if_branch_doesnt_exit()
+        public void should_not_make_a_request_when_no_update_service_is_configured()
         {
-            UseRealHttp();
-            Subject.GetLatestUpdate("invalid_branch", new Version(0, 2)).Should().NotBeNull();
-        }
+            Subject.GetLatestUpdate("main", new Version(0, 1));
+            Subject.GetRecentUpdates("main", new Version(0, 1), null);
 
-        [Test]
-        public void should_get_recent_updates()
-        {
-            const string branch = "develop";
-            UseRealHttp();
-            var recent = Subject.GetRecentUpdates(branch, new Version(0, 1), null);
-
-            recent.Should().NotBeEmpty();
-            recent.Should().OnlyContain(c => c.Hash.IsNotNullOrWhiteSpace());
-            recent.Should().OnlyContain(c => c.FileName.Contains("Readarr.develop.0"));
-            recent.Should().OnlyContain(c => c.ReleaseDate.Year >= 2014);
-            recent.Where(c => c.Changes != null).Should().OnlyContain(c => c.Changes.New != null);
-            recent.Where(c => c.Changes != null).Should().OnlyContain(c => c.Changes.Fixed != null);
-            recent.Should().OnlyContain(c => c.Branch == branch);
+            Mocker.GetMock<IHttpClient>()
+                  .Verify(c => c.Get<UpdatePackageAvailable>(It.IsAny<HttpRequest>()), Times.Never());
         }
     }
 }

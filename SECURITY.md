@@ -2,7 +2,10 @@
 
 ## Reporting a Vulnerability
 
-Please report (suspected) security vulnerabilities on Discord (preferred) to
-any of the Servarr Dev role holders (red names) or via email: development@servarr.com. You will receive a response from
-us within 72 hours. If the issue is confirmed, we will release a patch as soon
-as possible depending on complexity/severity.
+This is a personally maintained fork of Readarr. Please report (suspected)
+security vulnerabilities privately via
+[GitHub Security Advisories](https://github.com/Irishsmurf/Readarr/security/advisories/new)
+for this repository, or by opening a
+[GitHub issue](https://github.com/Irishsmurf/Readarr/issues) if the report
+does not need to stay private. Do not report vulnerabilities to the upstream
+Readarr/Servarr project — it does not maintain this fork.
