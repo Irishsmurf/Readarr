@@ -45,6 +45,17 @@ ENV READARR_CONFIG_DIR=/config \
     UMASK=002 \
     DOTNET_EnableDiagnostics=0
 
+# This fork's own update-check + analytics service (see docs/ingest-endpoint.md
+# and https://github.com/Irishsmurf/Readarr-Analytics) - not a third party, so
+# defaulting to it here doesn't violate the "never talk to a host the operator
+# didn't choose" posture the rest of this fork holds to. Turns on update checks
+# by default; analytics reporting stays opt-in via the separate AnalyticsEnabled
+# setting (Settings > General) - the two share this one gate by design, see
+# docs/analytics.md's "shared gating" decision. Override or disable with:
+#   docker run -e READARR__SERVICES_URL=https://your-own-endpoint ...
+#   docker run -e READARR__SERVICES_URL= ...   # disables both entirely
+ENV READARR__SERVICES_URL=https://readarr-analytics.paddez.com
+
 # System.Data.SQLite P/Invokes the system libsqlite3 rather than bundling it —
 # AssemblyLoader maps "sqlite3" to "libsqlite3.so.0" on Linux — and the aspnet
 # base image does not ship it. Without this the app builds and starts, then dies
