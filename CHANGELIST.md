@@ -15,6 +15,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.20.0] - 2026-08-03
+
+### Added
+
+- **[#8]** Real analytics reporter: opt-in, anonymous, aggregate-only usage reporting (app
+  version, branch, OS family, CPU architecture, .NET runtime version, database engine, whether a
+  custom metadata source is configured) to a small service this fork runs itself
+  ([Readarr-Analytics](https://github.com/Irishsmurf/Readarr-Analytics)). Off by default -
+  enable via Settings → General → Analytics. See `docs/analytics.md` for exactly what is and
+  isn't collected, and why.
+- Update checks work again out of the box in the official Docker image: `READARR__SERVICES_URL`
+  now defaults to this fork's own service instead of the retired upstream host. Still off by
+  default when built from source, and overridable/disableable per-install either way.
+- A release-time CI step now publishes each release's binaries to the Analytics service, so the
+  update-check endpoint above actually has something to report.
+
+### Changed
+
+- **[#8]** Crash reporting's frontend Sentry initialization no longer piggybacks on the analytics
+  toggle - it's gated by its own `CrashReportingEnabled` setting, matching the backend. Fixes a
+  bug where disabling analytics would have silently disabled frontend crash reporting too.
+- **[#8]** `UpdatePackageProvider` no longer sends the deprecated `active` query parameter that
+  used to piggyback analytics onto update-check requests.
+
+---
+
 ## [0.4.19.2] - 2026-08-01
 
 ### Fixed
