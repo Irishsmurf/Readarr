@@ -11,7 +11,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-*(nothing yet)*
+### Security
+
+- **[Dependencies]** Dropped the `Servarr.FluentMigrator.Runner` meta-package, which pulled
+  in every database provider FluentMigrator supports — including SqlServer via
+  `Microsoft.Data.SqlClient` 2.1.2, the source of four NuGet audit findings (one critical:
+  `System.Drawing.Common` GHSA-rxg9-xrhp-64gj). Readarr only uses SQLite and Postgres, both
+  already referenced directly, so nothing else changes. Removed the four corresponding
+  `NuGetAuditSuppress` entries from `src/Directory.Build.props`. ([#22](https://github.com/Irishsmurf/Readarr/issues/22))
 
 ---
 
