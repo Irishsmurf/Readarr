@@ -100,6 +100,7 @@ The codebase was wired to three hosts belonging to the retired project. This for
 | Crash reporting (`sentry.servarr.com`) | **Off** — upstream DSNs are gone | Set `READARR__SENTRY_DSN` to your own Sentry DSN |
 | Update checks (`readarr.servarr.com`) | **Off** — no request made | Set `READARR__SERVICES_URL` to your own update endpoint |
 | Metadata (`api.bookinfo.club`) | Fallback only | Settings → Metadata Source |
+| Analytics (this fork's own endpoint) | **Off** — opt-in | Settings → General → Analytics. Scope, field list and retention: [`docs/analytics.md`](docs/analytics.md) |
 
 ### You still need a metadata mirror
 

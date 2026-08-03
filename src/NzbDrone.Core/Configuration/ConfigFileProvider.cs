@@ -35,6 +35,7 @@ namespace NzbDrone.Core.Configuration
         AuthenticationType AuthenticationMethod { get; }
         AuthenticationRequiredType AuthenticationRequired { get; }
         bool AnalyticsEnabled { get; }
+        bool CrashReportingEnabled { get; }
         string LogLevel { get; }
         string ConsoleLogLevel { get; }
         bool LogSql { get; }
@@ -215,7 +216,8 @@ namespace NzbDrone.Core.Configuration
                 ? enumValue
                 : GetValueEnum("AuthenticationRequired", AuthenticationRequiredType.Enabled);
 
-        public bool AnalyticsEnabled => _logOptions.AnalyticsEnabled ?? GetValueBoolean("AnalyticsEnabled", true, persist: false);
+        public bool AnalyticsEnabled => _logOptions.AnalyticsEnabled ?? GetValueBoolean("AnalyticsEnabled", false, persist: false);
+        public bool CrashReportingEnabled => _logOptions.CrashReportingEnabled ?? GetValueBoolean("CrashReportingEnabled", true, persist: false);
 
         // TODO: Change back to "master" for the first stable release
         public string Branch => _updateOptions.Branch ?? GetValue("Branch", "develop").ToLowerInvariant();
