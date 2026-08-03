@@ -191,6 +191,7 @@ namespace NzbDrone.Test.Common
                              new XElement(nameof(ConfigFileProvider.ApiKey), apiKey),
                              new XElement(nameof(ConfigFileProvider.LogLevel), "trace"),
                              new XElement(nameof(ConfigFileProvider.AnalyticsEnabled), false),
+                             new XElement(nameof(ConfigFileProvider.CrashReportingEnabled), false),
                              new XElement(nameof(ConfigFileProvider.AuthenticationMethod), enableAuth ? "Forms" : "None"),
                              new XElement(nameof(ConfigFileProvider.AuthenticationRequired), "DisabledForLocalAddresses"),
                              new XElement(nameof(ConfigFileProvider.Port), Port)));

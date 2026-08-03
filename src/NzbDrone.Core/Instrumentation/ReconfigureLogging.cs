@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Instrumentation
             var sentryTarget = LogManager.Configuration.AllTargets.OfType<SentryTarget>().FirstOrDefault();
             if (sentryTarget != null)
             {
-                sentryTarget.SentryEnabled = (RuntimeInfo.IsProduction && _configFileProvider.AnalyticsEnabled) || RuntimeInfo.IsDevelopment;
+                sentryTarget.SentryEnabled = (RuntimeInfo.IsProduction && _configFileProvider.CrashReportingEnabled) || RuntimeInfo.IsDevelopment;
                 sentryTarget.FilterEvents = _configFileProvider.FilterSentryEvents;
             }
         }
