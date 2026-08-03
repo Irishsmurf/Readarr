@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Cache;
+using NzbDrone.Core.Analytics.Commands;
 using NzbDrone.Core.Backup;
 using NzbDrone.Core.Books.Commands;
 using NzbDrone.Core.Configuration;
@@ -88,6 +89,12 @@ namespace NzbDrone.Core.Jobs
                     {
                         Interval = 6 * 60,
                         TypeName = typeof(CheckHealthCommand).FullName
+                    },
+
+                    new ScheduledTask
+                    {
+                        Interval = 6 * 60,
+                        TypeName = typeof(SendAnalyticsCommand).FullName
                     },
 
                     new ScheduledTask

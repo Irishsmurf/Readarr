@@ -1,40 +1,28 @@
-using System;
-using System.Linq;
-using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Cloud;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.Datastore;
-using NzbDrone.Core.History;
 
 namespace NzbDrone.Core.Analytics
 {
     public interface IAnalyticsService
     {
         bool IsEnabled { get; }
-        bool InstallIsActive { get; }
     }
 
     public class AnalyticsService : IAnalyticsService
     {
         private readonly IConfigFileProvider _configFileProvider;
-        private readonly IHistoryService _historyService;
+        private readonly IReadarrCloudRequestBuilder _cloudRequestBuilder;
 
-        public AnalyticsService(IHistoryService historyService, IConfigFileProvider configFileProvider)
+        public AnalyticsService(IConfigFileProvider configFileProvider, IReadarrCloudRequestBuilder cloudRequestBuilder)
         {
             _configFileProvider = configFileProvider;
-            _historyService = historyService;
+            _cloudRequestBuilder = cloudRequestBuilder;
         }
 
-        public bool IsEnabled => (_configFileProvider.AnalyticsEnabled && RuntimeInfo.IsProduction) || RuntimeInfo.IsDevelopment;
-
-        public bool InstallIsActive
-        {
-            get
-            {
-                var lastRecord = _historyService.Paged(new PagingSpec<EntityHistory>() { Page = 0, PageSize = 1, SortKey = "date", SortDirection = SortDirection.Descending });
-                var monthAgo = DateTime.UtcNow.AddMonths(-1);
-
-                return lastRecord.Records.Any(v => v.Date > monthAgo);
-            }
-        }
+        // Reporting fires only when both the operator opted in and an endpoint has
+        // been configured to receive it - an install that hasn't set
+        // READARR__SERVICES_URL sends nothing, ever, regardless of this setting.
+        // See docs/analytics.md and docs/ingest-endpoint.md §2.2 in the Readarr repo.
+        public bool IsEnabled => _configFileProvider.AnalyticsEnabled && _cloudRequestBuilder.ServicesConfigured;
     }
 }
