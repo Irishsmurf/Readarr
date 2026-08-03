@@ -33,7 +33,7 @@
   "AlreadyInYourLibrary": "Already in your library",
   "AlternateTitles": "Alternate Titles",
   "Analytics": "Analytics",
-  "AnalyticsEnabledHelpText": "Send anonymous usage and error information to Readarr's servers. This includes information on your browser, which Readarr WebUI pages you use, error reporting as well as OS and runtime version. We will use this information to prioritize features and bug fixes.",
+  "AnalyticsEnabledHelpText": "Send anonymous, aggregate usage information to Readarr's servers: app version, branch, OS family, CPU architecture, .NET runtime version, database engine, and whether a custom metadata source is configured. Used only to decide which versions and platforms to keep supporting. Never includes an install identifier, error reports, or WebUI browsing activity.",
   "AnalyticsEnabledHelpTextWarning": "Requires restart to take effect",
   "AnyEditionOkHelpText": "Readarr will automatically switch to the edition best matching downloaded files",
   "ApiKey": "API Key",

@@ -88,7 +88,7 @@ function createMiddleware() {
 
 export default function createSentryMiddleware() {
   const {
-    analytics,
+    crashReportingEnabled,
     branch,
     version,
     release,
@@ -96,7 +96,7 @@ export default function createSentryMiddleware() {
     isProduction
   } = window.Readarr;
 
-  if (!analytics) {
+  if (!crashReportingEnabled) {
     return;
   }
 
