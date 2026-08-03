@@ -93,14 +93,19 @@ The image follows linuxserver.io conventions (`PUID`, `PGID`, `UMASK`, config at
 
 ## ⚙️ Upstream Services
 
-The codebase was wired to three hosts belonging to the retired project. This fork does not contact any of them unless you explicitly opt in:
+The codebase was wired to three hosts belonging to the retired project. Built from source, this
+fork does not contact any of them unless you explicitly opt in. The one exception is the official
+Docker image, which bakes in `READARR__SERVICES_URL` pointing at this fork's own
+[Readarr-Analytics](https://github.com/Irishsmurf/Readarr-Analytics) service — not a third
+party — so update checks work out of the box; analytics reporting stays opt-in regardless (see
+below), since the two are gated separately even though they share that one URL.
 
-| Service | Default | How to enable |
+| Service | Default | How to enable / disable |
 |---------|---------|---------------|
 | Crash reporting (`sentry.servarr.com`) | **Off** — upstream DSNs are gone | Set `READARR__SENTRY_DSN` to your own Sentry DSN |
-| Update checks (`readarr.servarr.com`) | **Off** — no request made | Set `READARR__SERVICES_URL` to your own update endpoint |
+| Update checks (`readarr.servarr.com` upstream) | **Off** from source. **On** in the official Docker image, against this fork's own service | Source: set `READARR__SERVICES_URL` yourself. Docker: override it, or set it to an empty string to disable — see the `ENV` in [`Dockerfile`](Dockerfile) |
 | Metadata (`api.bookinfo.club`) | Fallback only | Settings → Metadata Source |
-| Analytics (this fork's own endpoint) | **Off** — opt-in | Settings → General → Analytics. Scope, field list and retention: [`docs/analytics.md`](docs/analytics.md) |
+| Analytics (this fork's own endpoint) | **Off** — opt-in, everywhere, regardless of `READARR__SERVICES_URL` | Settings → General → Analytics. Scope, field list and retention: [`docs/analytics.md`](docs/analytics.md) |
 
 ### You still need a metadata mirror
 
