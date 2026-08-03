@@ -230,6 +230,11 @@ jobs:
     needs: build
     permissions:
       contents: write
+    env:
+      # Job-level so the publish step's own `if:` can see these — a step's
+      # `env:` block isn't available to its own `if:` condition.
+      ANALYTICS_SERVICE_URL: ${{ secrets.ANALYTICS_SERVICE_URL }}
+      ANALYTICS_RELEASE_TOKEN: ${{ secrets.ANALYTICS_RELEASE_TOKEN }}
 
     steps:
       - uses: actions/checkout@v6
@@ -314,3 +319,24 @@ jobs:
           files: |
             release-assets/*
           generate_release_notes: false
+
+      # Populates the `releases` table the Readarr-Analytics service's
+      # GET /update/:branch reads from - without this, this release is
+      # invisible to update checks even though it's on GitHub. Best-effort:
+      # skips entirely (rather than failing the release, which already
+      # happened above) until both secrets are configured, since the service
+      # isn't guaranteed to be deployed yet. See Readarr-Analytics's README
+      # ("Populating releases") for what to set and where.
+      - name: Publish release metadata to Analytics service
+        if: ${{ env.ANALYTICS_SERVICE_URL != '' && env.ANALYTICS_RELEASE_TOKEN != '' }}
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_DATE: ${{ github.event.head_commit.timestamp }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${RELEASE_DATE}" ]]; then
+            RELEASE_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          fi
+          export RELEASE_DATE
+          python3 .github/scripts/publish_release_metadata.py
