@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
@@ -321,6 +323,75 @@ namespace NzbDrone.Core.Test.MusicTests
                 .Verify(v => v.UpdateMany(It.Is<List<Book>>(x => x.Count == _books.Count)));
 
             ExceptionVerification.ExpectedWarns(1);
+        }
+
+        // The scheduled refresh (no AuthorId) asks the metadata server which authors changed
+        // so it can skip the rest. That question is an optimisation - the refresh has to
+        // survive the server not answering it.
+        private RefreshAuthorCommand GivenScheduledRefreshOfAllAuthors()
+        {
+            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
+                .Setup(s => s.GetAllAuthors())
+                .Returns(new List<Author> { _author });
+
+            Mocker.GetMock<ICheckIfAuthorShouldBeRefreshed>()
+                .Setup(s => s.ShouldRefresh(It.IsAny<Author>()))
+                .Returns(false);
+
+            return new RefreshAuthorCommand
+            {
+                LastExecutionTime = DateTime.UtcNow.AddDays(-1),
+                LastStartTime = DateTime.UtcNow.AddDays(-1)
+            };
+        }
+
+        [Test]
+        public void should_not_abort_scheduled_refresh_when_getting_changed_authors_fails()
+        {
+            var command = GivenScheduledRefreshOfAllAuthors();
+
+            Mocker.GetMock<IProvideAuthorInfo>()
+                .Setup(s => s.GetChangedAuthors(It.IsAny<DateTime>()))
+                .Throws(new HttpRequestException("No such host is known"));
+
+            Subject.Execute(command);
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_fall_back_to_should_refresh_when_changed_authors_are_unavailable()
+        {
+            var command = GivenScheduledRefreshOfAllAuthors();
+
+            Mocker.GetMock<IProvideAuthorInfo>()
+                .Setup(s => s.GetChangedAuthors(It.IsAny<DateTime>()))
+                .Throws(new HttpRequestException("No such host is known"));
+
+            Subject.Execute(command);
+
+            // Guards the difference between "no idea what changed" (null - decide per author)
+            // and "nothing changed" (empty set - skip every author). Swallowing the failure
+            // without resetting to null would silently refresh nothing at all.
+            Mocker.GetMock<ICheckIfAuthorShouldBeRefreshed>()
+                .Verify(v => v.ShouldRefresh(_author), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_ask_for_changed_authors_when_the_last_start_time_is_unknown()
+        {
+            var command = GivenScheduledRefreshOfAllAuthors();
+            command.LastStartTime = null;
+
+            Subject.Execute(command);
+
+            Mocker.GetMock<IProvideAuthorInfo>()
+                .Verify(v => v.GetChangedAuthors(It.IsAny<DateTime>()), Times.Never());
+
+            Mocker.GetMock<ICheckIfAuthorShouldBeRefreshed>()
+                .Verify(v => v.ShouldRefresh(_author), Times.Once());
         }
     }
 }

@@ -14,6 +14,13 @@ namespace NzbDrone.Common.Http
             Response = response;
         }
 
+        public HttpException(HttpRequest request, HttpResponse response, string message, Exception innerException)
+            : base(message, innerException)
+        {
+            Request = request;
+            Response = response;
+        }
+
         public HttpException(HttpRequest request, HttpResponse response)
             : this(request, response, string.Format("HTTP request failed: [{0}:{1}] [{2}] at [{3}]", (int)response.StatusCode, response.StatusCode, request.Method, request.Url))
         {

@@ -83,13 +83,22 @@ namespace NzbDrone.Core.HealthCheck
 
             foreach (var healthCheck in healthChecks)
             {
-                if (healthCheck is IProvideHealthCheckWithMessage && message != null)
+                try
                 {
-                    results.Add(((IProvideHealthCheckWithMessage)healthCheck).Check(message));
+                    if (healthCheck is IProvideHealthCheckWithMessage && message != null)
+                    {
+                        results.Add(((IProvideHealthCheckWithMessage)healthCheck).Check(message));
+                    }
+                    else
+                    {
+                        results.Add(healthCheck.Check());
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    results.Add(healthCheck.Check());
+                    // One check that throws used to discard the results of every other check
+                    // in the run, including the ones that had already passed.
+                    _logger.Error(ex, "Health check {0} failed to run", healthCheck.GetType().Name);
                 }
             }
 
