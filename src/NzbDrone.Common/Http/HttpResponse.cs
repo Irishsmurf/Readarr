@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
 
@@ -104,7 +105,18 @@ namespace NzbDrone.Common.Http
         public HttpResponse(HttpResponse response)
             : base(response.Request, response.Headers, response.ResponseData, response.StatusCode, response.Version)
         {
-            Resource = Json.Deserialize<T>(response.Content);
+            try
+            {
+                Resource = Json.Deserialize<T>(response.Content);
+            }
+            catch (JsonReaderException ex)
+            {
+                throw new InvalidJsonResponseException(response, ex);
+            }
+            catch (JsonSerializationException ex)
+            {
+                throw new InvalidJsonResponseException(response, ex);
+            }
         }
 
         public T Resource { get; private set; }

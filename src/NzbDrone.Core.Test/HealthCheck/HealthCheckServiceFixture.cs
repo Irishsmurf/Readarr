@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
@@ -5,6 +6,7 @@ using NzbDrone.Common.Cache;
 using NzbDrone.Common.Messaging;
 using NzbDrone.Core.HealthCheck;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.HealthCheck
 {
@@ -48,6 +50,20 @@ namespace NzbDrone.Core.Test.HealthCheck
 
             _healthCheck.Executed.Should().BeTrue();
         }
+
+        [Test]
+        public void should_continue_running_checks_when_one_check_throws()
+        {
+            // The throwing check goes first: a run used to be abandoned wholesale, discarding
+            // the results of every check behind it.
+            Mocker.SetConstant<IEnumerable<IProvideHealthCheck>>(new IProvideHealthCheck[] { new ThrowingHealthCheck(), _healthCheck });
+
+            Subject.HandleAsync(new FakeEvent2());
+
+            _healthCheck.Executed.Should().BeTrue();
+
+            ExceptionVerification.ExpectedErrors(1);
+        }
     }
 
     public class FakeEvent : IEvent
@@ -80,6 +96,18 @@ namespace NzbDrone.Core.Test.HealthCheck
         public bool ShouldCheckOnEvent(FakeEvent message)
         {
             return message.ShouldExecute;
+        }
+    }
+
+    [CheckOn(typeof(FakeEvent2))]
+    public class ThrowingHealthCheck : IProvideHealthCheck
+    {
+        public bool CheckOnStartup => false;
+        public bool CheckOnSchedule => false;
+
+        public Core.HealthCheck.HealthCheck Check()
+        {
+            throw new InvalidOperationException("Something went wrong");
         }
     }
 }

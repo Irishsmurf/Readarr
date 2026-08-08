@@ -78,7 +78,22 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
 
             httpRequest.SuppressHttpError = true;
 
-            var httpResponse = _httpClient.Get<RecentUpdatesResource>(httpRequest);
+            HttpResponse<RecentUpdatesResource> httpResponse;
+
+            try
+            {
+                httpResponse = _httpClient.Get<RecentUpdatesResource>(httpRequest);
+            }
+            catch (Exception ex)
+            {
+                // Null is this method's "no idea what changed" answer - the caller then falls
+                // back to deciding per author. Everything from a dead host to an error page
+                // where JSON was expected has to land there rather than abort the refresh,
+                // which is why this catch is deliberately broad: SuppressHttpError above
+                // means a failing server rarely even throws HttpException.
+                _logger.Warn(ex, "Unable to get authors changed since {0} from the metadata server, falling back to refreshing stale authors", startTime);
+                return null;
+            }
 
             if (httpResponse.Resource == null || httpResponse.Resource.Limited)
             {
