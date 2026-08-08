@@ -23,7 +23,10 @@ env:
   # run number. It used to be read out of azure-pipelines.yml, which was the last
   # thing keeping that file alive; the value is carried over unchanged from the
   # final upstream build so versions do not appear to go backwards.
-  MAJOR_VERSION: '0.4.19'
+  # Rolling main builds version as MAJOR_VERSION.run_number, so this has to keep
+  # pace with the release series or main images sort below the latest release and
+  # look out of date to the update check. Bump it when the series does.
+  MAJOR_VERSION: '0.4.20'
 
 jobs:
   build:
