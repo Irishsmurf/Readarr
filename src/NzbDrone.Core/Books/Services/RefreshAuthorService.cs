@@ -379,24 +379,11 @@ namespace NzbDrone.Core.Books
                 var authors = _authorService.GetAllAuthors().OrderBy(c => c.Name).ToList();
                 var authorIds = authors.Select(x => x.Id).ToList();
 
-                // Null until the metadata server actually tells us what changed. The loop below
-                // reads null as "decide per author" and an empty set as "the server says nothing
-                // changed, skip them all" - so every path where we simply do not know has to
-                // leave this null, or a whole scheduled refresh silently does nothing.
-                HashSet<string> updatedGoodreadsAuthors = null;
+                var updatedGoodreadsAuthors = new HashSet<string>();
 
-                if (message.LastExecutionTime.HasValue && message.LastStartTime.HasValue &&
-                    message.LastExecutionTime.Value.AddDays(14) > DateTime.UtcNow)
+                if (message.LastExecutionTime.HasValue && message.LastExecutionTime.Value.AddDays(14) > DateTime.UtcNow)
                 {
-                    try
-                    {
-                        updatedGoodreadsAuthors = _authorInfo.GetChangedAuthors(message.LastStartTime.Value);
-                    }
-                    catch (Exception e)
-                    {
-                        updatedGoodreadsAuthors = null;
-                        _logger.Warn(e, "Couldn't get changed authors, refreshing all stale authors instead");
-                    }
+                    updatedGoodreadsAuthors = _authorInfo.GetChangedAuthors(message.LastStartTime.Value);
                 }
 
                 foreach (var author in authors)

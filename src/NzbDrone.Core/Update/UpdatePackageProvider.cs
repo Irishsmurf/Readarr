@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using NLog;
 using NzbDrone.Common.Cloud;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Http;
@@ -22,16 +21,14 @@ namespace NzbDrone.Core.Update
         private readonly IHttpRequestBuilderFactory _requestBuilder;
         private readonly IPlatformInfo _platformInfo;
         private readonly IMainDatabase _mainDatabase;
-        private readonly Logger _logger;
 
-        public UpdatePackageProvider(IHttpClient httpClient, IReadarrCloudRequestBuilder requestBuilder, IPlatformInfo platformInfo, IMainDatabase mainDatabase, Logger logger)
+        public UpdatePackageProvider(IHttpClient httpClient, IReadarrCloudRequestBuilder requestBuilder, IPlatformInfo platformInfo, IMainDatabase mainDatabase)
         {
             _platformInfo = platformInfo;
             _cloudRequestBuilder = requestBuilder;
             _requestBuilder = requestBuilder.Services;
             _httpClient = httpClient;
             _mainDatabase = mainDatabase;
-            _logger = logger;
         }
 
         public UpdatePackage GetLatestUpdate(string branch, Version currentVersion)
@@ -52,23 +49,9 @@ namespace NzbDrone.Core.Update
                                          .AddQueryParam("includeMajorVersion", true)
                                          .SetSegment("branch", branch);
 
-            UpdatePackageAvailable update;
+            var update = _httpClient.Get<UpdatePackageAvailable>(request.Build()).Resource;
 
-            try
-            {
-                update = _httpClient.Get<UpdatePackageAvailable>(request.Build()).Resource;
-            }
-            catch (Exception ex)
-            {
-                // An endpoint that is down, or that answers something other than the update
-                // contract, means we cannot tell whether an update exists - which is the same
-                // outcome as there not being one. Failing the check instead would put an error
-                // in the log every six hours.
-                _logger.Warn(ex, "Unable to check for updates");
-                return null;
-            }
-
-            if (update == null || !update.Available)
+            if (!update.Available)
             {
                 return null;
             }
@@ -97,15 +80,9 @@ namespace NzbDrone.Core.Update
                 request.AddQueryParam("prevVersion", previousVersion);
             }
 
-            try
-            {
-                return _httpClient.Get<List<UpdatePackage>>(request.Build()).Resource;
-            }
-            catch (Exception ex)
-            {
-                _logger.Warn(ex, "Unable to get recent updates");
-                return new List<UpdatePackage>();
-            }
+            var updates = _httpClient.Get<List<UpdatePackage>>(request.Build());
+
+            return updates.Resource;
         }
     }
 }
