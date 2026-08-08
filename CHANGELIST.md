@@ -15,6 +15,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.20.1] - 2026-08-08
+
+### Fixed
+
+- **[#56]** `Newtonsoft.Json.JsonReaderException` aborted the daily author refresh whenever the
+  metadata server answered with something that wasn't JSON.
+  - The scheduled refresh asks the metadata server which authors changed since the last run, so it
+    can skip the rest. `BookInfoProxy.GetChangedAuthors` sets `SuppressHttpError` precisely so a
+    failing server degrades gracefully — it checks `Resource == null` and returns `null`, which
+    makes the caller fall back to its per-author heuristic. That guard could never run:
+    `HttpResponse<T>` deserializes in its constructor, so a plain-text `Service Unavailable` body
+    threw first. The call also sat outside the per-author `try/catch`, so one bad response took
+    down the entire refresh. Installs with no configured metadata mirror hit this against the
+    retired `api.bookinfo.club` host.
+  - `HttpResponse<T>` now raises `InvalidJsonResponseException`, naming the URL, status code,
+    content type and a truncated body sample, and keeping the original reader exception as
+    `InnerException`. It is the single point `Get<T>`/`Post<T>`, `CachedHttpResponseService.Get<T>`
+    and `GazelleParser` all funnel through. Deliberately **no** content-type allowlist: valid JSON
+    served with a wrong or missing `Content-Type` still parses exactly as before.
+  - A metadata outage now degrades to "refresh the stale authors" and logs a warning, instead of
+    failing the task. Note this means the task no longer shows as **Failed** in System → Tasks;
+    the failure is recorded in the log at `Warn`.
+  - Also fixes a latent `InvalidOperationException` on the same line: `message.LastStartTime.Value`
+    was guarded only by `LastExecutionTime.HasValue`, though the two are independent nullables.
+  - The other `READARR__SERVICES_URL` consumers got the same treatment, since the Docker image
+    points that variable at this fork's analytics service and only `/analytics` is specified:
+    `UpdatePackageProvider` degrades to "no update available" rather than failing the update check
+    every six hours, and `SystemTimeCheck` now skips when no services URL is configured (it was
+    contacting the retired upstream host unconditionally, contrary to the README) and no longer
+    reports a clock problem when it cannot reach a clock.
+  - `HealthCheckService` runs each check in its own `try/catch`. One check that threw used to
+    discard the results of every other check in that run.
+  - **PR:** [#56](https://github.com/Irishsmurf/Readarr/pull/56)
+
+---
+
 ## [0.4.20.0] - 2026-08-03
 
 ### Added
@@ -82,6 +118,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 | **Security** | Security-related changes |
 | **Deprecated** | Soon-to-be removed features |
 
-[Unreleased]: https://github.com/Irishsmurf/Readarr/compare/v0.4.19.2...HEAD
+[Unreleased]: https://github.com/Irishsmurf/Readarr/compare/v0.4.20.1...HEAD
+[0.4.20.1]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.20.1
+[0.4.20.0]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.20.0
 [0.4.19.2]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.19.2
 [0.4.19.1]: https://github.com/Irishsmurf/Readarr/releases/tag/v0.4.19.1
