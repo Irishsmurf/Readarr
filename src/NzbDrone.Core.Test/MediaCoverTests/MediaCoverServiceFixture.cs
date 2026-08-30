@@ -275,6 +275,9 @@ namespace NzbDrone.Core.Test.MediaCoverTests
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+
+            Mocker.GetMock<IAuthorMetadataService>()
+                  .Verify(v => v.Upsert(It.IsAny<AuthorMetadata>()), Times.Once());
         }
 
         [Test]
@@ -288,6 +291,9 @@ namespace NzbDrone.Core.Test.MediaCoverTests
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+
+            Mocker.GetMock<IEditionService>()
+                  .Verify(v => v.UpdateMany(It.IsAny<List<Edition>>()), Times.Once());
         }
     }
 }
