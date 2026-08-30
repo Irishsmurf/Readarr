@@ -321,6 +321,11 @@ namespace NzbDrone.Core.MediaCover
 
         private string GetExtension(MediaCoverTypes coverType, string defaultExtension)
         {
+            if (string.IsNullOrWhiteSpace(defaultExtension))
+            {
+                defaultExtension = ".jpg";
+            }
+
             return coverType switch
             {
                 MediaCoverTypes.Clearlogo => ".png",
@@ -393,7 +398,7 @@ namespace NzbDrone.Core.MediaCover
                 var existingCover = author.Metadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster);
                 if (existingCover == null)
                 {
-                    existingCover = new MediaCover(MediaCoverTypes.Poster, remoteUrl ?? string.Empty);
+                    existingCover = new MediaCover(MediaCoverTypes.Poster, remoteUrl ?? "cover.jpg");
                     author.Metadata.Value.Images.Add(existingCover);
                 }
                 else if (!string.IsNullOrWhiteSpace(remoteUrl))
@@ -441,7 +446,7 @@ namespace NzbDrone.Core.MediaCover
                 var existingCover = monitoredEdition.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Cover);
                 if (existingCover == null)
                 {
-                    existingCover = new MediaCover(MediaCoverTypes.Cover, remoteUrl ?? string.Empty);
+                    existingCover = new MediaCover(MediaCoverTypes.Cover, remoteUrl ?? "cover.jpg");
                     monitoredEdition.Images.Add(existingCover);
                 }
                 else if (!string.IsNullOrWhiteSpace(remoteUrl))
