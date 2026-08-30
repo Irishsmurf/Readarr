@@ -92,7 +92,43 @@ namespace Readarr.Api.V1.MediaCovers
         }
 
         [HttpPost(@"author/{authorId:int}")]
-        public async Task<IActionResult> UpdateAuthorCover(int authorId, [FromBody] MediaCoverUrlRequest urlRequest = null, IFormFile file = null)
+        [Consumes("application/json")]
+        public IActionResult UpdateAuthorCoverFromUrl(int authorId, [FromBody] MediaCoverUrlRequest urlRequest)
+        {
+            var author = _authorService.GetAuthor(authorId);
+            if (author == null)
+            {
+                return NotFound();
+            }
+
+            if (urlRequest == null || string.IsNullOrWhiteSpace(urlRequest.Url))
+            {
+                return BadRequest("No valid URL provided");
+            }
+
+            var remoteUrl = urlRequest.Url.Trim();
+            byte[] bytes;
+            try
+            {
+                var response = _httpClient.Get(new NzbDrone.Common.Http.HttpRequest(remoteUrl));
+                bytes = response.ResponseData;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Failed to download image from URL: {ex.Message}");
+            }
+
+            if (bytes == null || bytes.Length == 0)
+            {
+                return BadRequest("Downloaded image is empty");
+            }
+
+            _coverService.SaveAuthorCover(author, bytes, remoteUrl);
+            return Ok(new { success = true });
+        }
+
+        [HttpPost(@"author/{authorId:int}/upload")]
+        public async Task<IActionResult> UploadAuthorCover(int authorId, IFormFile file = null)
         {
             var author = _authorService.GetAuthor(authorId);
             if (author == null)
@@ -101,8 +137,6 @@ namespace Readarr.Api.V1.MediaCovers
             }
 
             byte[] bytes = null;
-            string remoteUrl = null;
-
             if (file != null && file.Length > 0)
             {
                 using var ms = new MemoryStream();
@@ -119,31 +153,54 @@ namespace Readarr.Api.V1.MediaCovers
                     bytes = ms.ToArray();
                 }
             }
-            else if (urlRequest != null && !string.IsNullOrWhiteSpace(urlRequest.Url))
-            {
-                remoteUrl = urlRequest.Url.Trim();
-                try
-                {
-                    var response = _httpClient.Get(new NzbDrone.Common.Http.HttpRequest(remoteUrl));
-                    bytes = response.ResponseData;
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest($"Failed to download image from URL: {ex.Message}");
-                }
-            }
 
             if (bytes == null || bytes.Length == 0)
             {
-                return BadRequest("No image file or valid URL provided");
+                return BadRequest("No image file provided");
             }
 
-            _coverService.SaveAuthorCover(author, bytes, remoteUrl);
+            _coverService.SaveAuthorCover(author, bytes);
             return Ok(new { success = true });
         }
 
         [HttpPost(@"book/{bookId:int}")]
-        public async Task<IActionResult> UpdateBookCover(int bookId, [FromBody] MediaCoverUrlRequest urlRequest = null, IFormFile file = null)
+        [Consumes("application/json")]
+        public IActionResult UpdateBookCoverFromUrl(int bookId, [FromBody] MediaCoverUrlRequest urlRequest)
+        {
+            var book = _bookService.GetBook(bookId);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            if (urlRequest == null || string.IsNullOrWhiteSpace(urlRequest.Url))
+            {
+                return BadRequest("No valid URL provided");
+            }
+
+            var remoteUrl = urlRequest.Url.Trim();
+            byte[] bytes;
+            try
+            {
+                var response = _httpClient.Get(new NzbDrone.Common.Http.HttpRequest(remoteUrl));
+                bytes = response.ResponseData;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Failed to download image from URL: {ex.Message}");
+            }
+
+            if (bytes == null || bytes.Length == 0)
+            {
+                return BadRequest("Downloaded image is empty");
+            }
+
+            _coverService.SaveBookCover(book, bytes, remoteUrl);
+            return Ok(new { success = true });
+        }
+
+        [HttpPost(@"book/{bookId:int}/upload")]
+        public async Task<IActionResult> UploadBookCover(int bookId, IFormFile file = null)
         {
             var book = _bookService.GetBook(bookId);
             if (book == null)
@@ -152,8 +209,6 @@ namespace Readarr.Api.V1.MediaCovers
             }
 
             byte[] bytes = null;
-            string remoteUrl = null;
-
             if (file != null && file.Length > 0)
             {
                 using var ms = new MemoryStream();
@@ -170,26 +225,13 @@ namespace Readarr.Api.V1.MediaCovers
                     bytes = ms.ToArray();
                 }
             }
-            else if (urlRequest != null && !string.IsNullOrWhiteSpace(urlRequest.Url))
-            {
-                remoteUrl = urlRequest.Url.Trim();
-                try
-                {
-                    var response = _httpClient.Get(new NzbDrone.Common.Http.HttpRequest(remoteUrl));
-                    bytes = response.ResponseData;
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest($"Failed to download image from URL: {ex.Message}");
-                }
-            }
 
             if (bytes == null || bytes.Length == 0)
             {
-                return BadRequest("No image file or valid URL provided");
+                return BadRequest("No image file provided");
             }
 
-            _coverService.SaveBookCover(book, bytes, remoteUrl);
+            _coverService.SaveBookCover(book, bytes);
             return Ok(new { success = true });
         }
 
