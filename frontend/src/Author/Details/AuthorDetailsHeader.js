@@ -17,6 +17,7 @@ import fonts from 'Styles/Variables/fonts';
 import formatBytes from 'Utilities/Number/formatBytes';
 import stripHtml from 'Utilities/String/stripHtml';
 import translate from 'Utilities/String/translate';
+import EditCoverModal from 'Components/MediaCover/EditCoverModal';
 import AuthorAlternateTitles from './AuthorAlternateTitles';
 import AuthorDetailsLinks from './AuthorDetailsLinks';
 import AuthorTagsConnector from './AuthorTagsConnector';
@@ -39,9 +40,18 @@ class AuthorDetailsHeader extends Component {
 
     this.state = {
       overviewHeight: 0,
-      titleWidth: 0
+      titleWidth: 0,
+      isEditCoverModalOpen: false
     };
   }
+
+  onOpenEditCoverModal = () => {
+    this.setState({ isEditCoverModalOpen: true });
+  };
+
+  onCloseEditCoverModal = () => {
+    this.setState({ isEditCoverModalOpen: false });
+  };
 
   //
   // Listeners
@@ -115,12 +125,22 @@ class AuthorDetailsHeader extends Component {
         </div>
 
         <div className={styles.headerContent}>
-          <AuthorPoster
-            className={styles.poster}
-            images={images}
-            size={250}
-            lazy={false}
-          />
+          <div
+            className={styles.posterContainer}
+            onClick={this.onOpenEditCoverModal}
+            title="Click to change cover image"
+          >
+            <AuthorPoster
+              className={styles.poster}
+              images={images}
+              size={250}
+              lazy={false}
+            />
+            <div className={styles.posterOverlay}>
+              <Icon name={icons.EDIT} className={styles.posterEditIcon} />
+              <span>Change Cover</span>
+            </div>
+          </div>
 
           <div className={styles.info}>
             <Measure
@@ -311,6 +331,14 @@ class AuthorDetailsHeader extends Component {
             </Measure>
           </div>
         </div>
+
+        <EditCoverModal
+          isOpen={this.state.isEditCoverModalOpen}
+          onModalClose={this.onCloseEditCoverModal}
+          type="author"
+          id={id}
+          title={authorName}
+        />
       </div>
     );
   }

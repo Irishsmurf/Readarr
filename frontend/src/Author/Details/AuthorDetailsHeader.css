@@ -28,10 +28,51 @@
   color: var(--white);
 }
 
-.poster {
+.posterContainer {
+  position: relative;
   flex-shrink: 0;
   margin-right: 35px;
   height: 250px;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.poster {
+  display: block;
+  height: 250px;
+  transition: transform 0.2s ease;
+}
+
+.posterOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.posterContainer:hover .posterOverlay {
+  opacity: 1;
+}
+
+.posterContainer:hover .poster {
+  transform: scale(1.03);
+}
+
+.posterEditIcon {
+  font-size: 20px;
 }
 
 .info {

@@ -15,6 +15,7 @@ import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
 import fonts from 'Styles/Variables/fonts';
 import formatBytes from 'Utilities/Number/formatBytes';
 import stripHtml from 'Utilities/String/stripHtml';
+import EditCoverModal from 'Components/MediaCover/EditCoverModal';
 import BookDetailsLinks from './BookDetailsLinks';
 import styles from './BookDetailsHeader.css';
 
@@ -35,9 +36,18 @@ class BookDetailsHeader extends Component {
 
     this.state = {
       overviewHeight: 0,
-      titleWidth: 0
+      titleWidth: 0,
+      isEditCoverModalOpen: false
     };
   }
+
+  onOpenEditCoverModal = () => {
+    this.setState({ isEditCoverModalOpen: true });
+  };
+
+  onCloseEditCoverModal = () => {
+    this.setState({ isEditCoverModalOpen: false });
+  };
 
   //
   // Listeners
@@ -96,12 +106,22 @@ class BookDetailsHeader extends Component {
         </div>
 
         <div className={styles.headerContent}>
-          <BookCover
-            className={styles.cover}
-            images={images}
-            size={250}
-            lazy={false}
-          />
+          <div
+            className={styles.coverContainer}
+            onClick={this.onOpenEditCoverModal}
+            title="Click to change book cover"
+          >
+            <BookCover
+              className={styles.cover}
+              images={images}
+              size={250}
+              lazy={false}
+            />
+            <div className={styles.coverOverlay}>
+              <Icon name={icons.EDIT} className={styles.coverEditIcon} />
+              <span>Change Cover</span>
+            </div>
+          </div>
 
           <div className={styles.info}>
             <Measure
@@ -240,6 +260,14 @@ class BookDetailsHeader extends Component {
             </Measure>
           </div>
         </div>
+
+        <EditCoverModal
+          isOpen={this.state.isEditCoverModalOpen}
+          onModalClose={this.onCloseEditCoverModal}
+          type="book"
+          id={this.props.id}
+          title={title}
+        />
       </div>
     );
   }

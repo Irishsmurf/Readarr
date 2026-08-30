@@ -21,6 +21,8 @@ namespace NzbDrone.Core.MediaCover
         void ConvertToLocalUrls(int entityId, MediaCoverEntity coverEntity, IEnumerable<MediaCover> covers);
         string GetCoverPath(int entityId, MediaCoverEntity coverEntity, MediaCoverTypes coverType, string extension, int? height = null);
         void EnsureBookCovers(Book book);
+        void SaveAuthorCover(Author author, byte[] imageData, string remoteUrl = null);
+        void SaveBookCover(Book book, byte[] imageData, string remoteUrl = null);
     }
 
     public class MediaCoverService :
@@ -350,6 +352,91 @@ namespace NzbDrone.Core.MediaCover
             }
 
             return null;
+        }
+
+        public void SaveAuthorCover(Author author, byte[] imageData, string remoteUrl = null)
+        {
+            var folder = GetAuthorCoverPath(author.Id);
+            if (!_diskProvider.FolderExists(folder))
+            {
+                _diskProvider.CreateFolder(folder);
+            }
+
+            var mainFileName = GetCoverPath(author.Id, MediaCoverEntity.Author, MediaCoverTypes.Poster, ".jpg");
+            _diskProvider.WriteAllBytes(mainFileName, imageData);
+
+            var heights = GetDefaultHeights(MediaCoverTypes.Poster);
+            foreach (var height in heights)
+            {
+                var resizeFileName = GetCoverPath(author.Id, MediaCoverEntity.Author, MediaCoverTypes.Poster, ".jpg", height);
+                try
+                {
+                    _resizer.Resize(mainFileName, resizeFileName, height);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Couldn't resize uploaded media cover {0}-{1} for author {2}", MediaCoverTypes.Poster, height, author);
+                }
+            }
+
+            if (author.Metadata.Value != null)
+            {
+                var existingCover = author.Metadata.Value.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Poster);
+                if (existingCover == null)
+                {
+                    existingCover = new MediaCover(MediaCoverTypes.Poster, remoteUrl ?? string.Empty);
+                    author.Metadata.Value.Images.Add(existingCover);
+                }
+                else if (!string.IsNullOrWhiteSpace(remoteUrl))
+                {
+                    existingCover.Url = remoteUrl;
+                }
+            }
+
+            _eventAggregator.PublishEvent(new MediaCoversUpdatedEvent(author));
+        }
+
+        public void SaveBookCover(Book book, byte[] imageData, string remoteUrl = null)
+        {
+            var folder = GetBookCoverPath(book.Id);
+            if (!_diskProvider.FolderExists(folder))
+            {
+                _diskProvider.CreateFolder(folder);
+            }
+
+            var mainFileName = GetCoverPath(book.Id, MediaCoverEntity.Book, MediaCoverTypes.Cover, ".jpg");
+            _diskProvider.WriteAllBytes(mainFileName, imageData);
+
+            var heights = GetDefaultHeights(MediaCoverTypes.Cover);
+            foreach (var height in heights)
+            {
+                var resizeFileName = GetCoverPath(book.Id, MediaCoverEntity.Book, MediaCoverTypes.Cover, ".jpg", height);
+                try
+                {
+                    _resizer.Resize(mainFileName, resizeFileName, height);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Couldn't resize uploaded media cover {0}-{1} for book {2}", MediaCoverTypes.Cover, height, book);
+                }
+            }
+
+            var monitoredEdition = book.Editions.Value?.FirstOrDefault(x => x.Monitored) ?? book.Editions.Value?.FirstOrDefault();
+            if (monitoredEdition != null)
+            {
+                var existingCover = monitoredEdition.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Cover);
+                if (existingCover == null)
+                {
+                    existingCover = new MediaCover(MediaCoverTypes.Cover, remoteUrl ?? string.Empty);
+                    monitoredEdition.Images.Add(existingCover);
+                }
+                else if (!string.IsNullOrWhiteSpace(remoteUrl))
+                {
+                    existingCover.Url = remoteUrl;
+                }
+            }
+
+            _eventAggregator.PublishEvent(new MediaCoversUpdatedEvent(book));
         }
 
         public void HandleAsync(AuthorRefreshCompleteEvent message)
