@@ -141,7 +141,7 @@ namespace NzbDrone.Core.MediaCover
 
             foreach (var cover in author.Metadata.Value.Images)
             {
-                if (cover.CoverType == MediaCoverTypes.Unknown)
+                if (cover.CoverType == MediaCoverTypes.Unknown || !cover.Url.IsValidUrl())
                 {
                     continue;
                 }
@@ -195,7 +195,7 @@ namespace NzbDrone.Core.MediaCover
         {
             foreach (var cover in book.Editions.Value.Single(x => x.Monitored).Images.Where(e => e.CoverType == MediaCoverTypes.Cover))
             {
-                if (cover.CoverType == MediaCoverTypes.Unknown)
+                if (cover.CoverType == MediaCoverTypes.Unknown || !cover.Url.IsValidUrl())
                 {
                     continue;
                 }

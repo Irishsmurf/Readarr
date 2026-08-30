@@ -803,7 +803,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             metadata.NameLastFirst = metadata.Name.ToLastFirst();
             metadata.SortNameLastFirst = metadata.NameLastFirst.ToLower();
 
-            if (resource.ImageUrl.IsNotNullOrWhiteSpace())
+            if (resource.ImageUrl.IsValidUrl())
             {
                 metadata.Images.Add(new MediaCover.MediaCover
                 {
@@ -990,7 +990,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
                 Ratings = new Ratings { Votes = resource.RatingCount, Value = (decimal)resource.AverageRating }
             };
 
-            if (resource.ImageUrl.IsNotNullOrWhiteSpace())
+            if (resource.ImageUrl.IsValidUrl())
             {
                 edition.Images.Add(new MediaCover.MediaCover
                 {
