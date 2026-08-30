@@ -15,16 +15,19 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
     public class GoodreadsSearchProxy : IGoodreadsSearchProxy
     {
         private readonly ICachedHttpResponseService _cachedHttpClient;
+        private readonly IMetadataRequestBuilder _requestBuilder;
         private readonly Logger _logger;
-        private readonly IHttpRequestBuilderFactory _searchBuilder;
+        private readonly IHttpRequestBuilderFactory _fallbackSearchBuilder;
 
         public GoodreadsSearchProxy(ICachedHttpResponseService cachedHttpClient,
+            IMetadataRequestBuilder requestBuilder,
             Logger logger)
         {
             _cachedHttpClient = cachedHttpClient;
+            _requestBuilder = requestBuilder;
             _logger = logger;
 
-            _searchBuilder = new HttpRequestBuilder("https://www.goodreads.com/book/auto_complete")
+            _fallbackSearchBuilder = new HttpRequestBuilder("https://www.goodreads.com/book/auto_complete")
                 .AddQueryParam("format", "json")
                 .SetHeader("User-Agent",
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36")
@@ -36,13 +39,42 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         {
             try
             {
-                var httpRequest = _searchBuilder.Create()
+                var factory = _requestBuilder?.GetRequestBuilder();
+                if (factory != null)
+                {
+                    var httpRequest = factory.Create()
+                        .SetSegment("route", "search")
+                        .AddQueryParam("query", query)
+                        .Build();
+
+                    httpRequest.AllowAutoRedirect = true;
+                    httpRequest.SuppressHttpError = true;
+
+                    var response = _cachedHttpClient.Get<List<SearchJsonResource>>(httpRequest, true, TimeSpan.FromDays(5));
+
+                    if (response?.Resource != null && response.Resource.Count > 0)
+                    {
+                        return response.Resource;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Metadata search endpoint failed for query '{0}', falling back to autocomplete if available", query);
+            }
+
+            try
+            {
+                var httpRequest = _fallbackSearchBuilder.Create()
                     .AddQueryParam("q", query)
                     .Build();
 
+                httpRequest.AllowAutoRedirect = true;
+                httpRequest.SuppressHttpError = true;
+
                 var response = _cachedHttpClient.Get<List<SearchJsonResource>>(httpRequest, true, TimeSpan.FromDays(5));
 
-                return response.Resource;
+                return response?.Resource ?? new List<SearchJsonResource>();
             }
             catch (HttpException ex)
             {
