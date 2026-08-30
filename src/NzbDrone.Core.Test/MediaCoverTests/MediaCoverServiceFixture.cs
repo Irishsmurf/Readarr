@@ -297,19 +297,26 @@ namespace NzbDrone.Core.Test.MediaCoverTests
         }
 
         [Test]
-        public void should_save_book_cover_and_resize()
+        public void should_convert_to_local_urls_with_default_extension_when_extension_is_empty()
         {
-            var testBytes = new byte[] { 5, 6, 7, 8 };
-            Subject.SaveBookCover(_book, testBytes, "https://example.com/bookcover.jpg");
+            var covers = new List<MediaCover.MediaCover>
+                {
+                    new MediaCover.MediaCover
+                    {
+                        Url = "cover",
+                        CoverType = MediaCoverTypes.Poster
+                    }
+                };
 
-            Mocker.GetMock<IDiskProvider>()
-                  .Verify(v => v.SaveStream(It.IsAny<Stream>(), It.IsAny<string>()), Times.Once());
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileGetLastWrite(It.IsAny<string>()))
+                  .Returns(new DateTime(1234));
 
-            Mocker.GetMock<IImageResizer>()
-                  .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(It.IsAny<string>()))
+                  .Returns(true);
 
-            Mocker.GetMock<IEditionService>()
-                  .Verify(v => v.UpdateMany(It.IsAny<List<Edition>>()), Times.Once());
+            Subject.ConvertToLocalUrls(140, MediaCoverEntity.Author, covers);
+
+            covers.Single().Url.Should().Be("/MediaCover/140/poster.jpg?lastWrite=1234");
         }
     }
 }
