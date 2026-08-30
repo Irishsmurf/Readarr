@@ -281,6 +281,22 @@ namespace NzbDrone.Core.Test.MediaCoverTests
         }
 
         [Test]
+        public void should_persist_author_cover_metadata_when_author_has_no_initial_images()
+        {
+            var authorWithoutImages = Builder<Author>.CreateNew()
+                .With(v => v.Id = 140)
+                .With(v => v.Metadata.Value.Images = new List<MediaCover.MediaCover>())
+                .Build();
+
+            var testBytes = new byte[] { 9, 10, 11 };
+            Subject.SaveAuthorCover(authorWithoutImages, testBytes, "https://example.com/jem-calder.jpg");
+
+            authorWithoutImages.Metadata.Value.Images.Should().ContainSingle(img => img.CoverType == MediaCoverTypes.Poster);
+            Mocker.GetMock<IAuthorMetadataService>()
+                  .Verify(v => v.Upsert(It.Is<AuthorMetadata>(m => m.Images.Any(img => img.CoverType == MediaCoverTypes.Poster))), Times.Once());
+        }
+
+        [Test]
         public void should_save_book_cover_and_resize()
         {
             var testBytes = new byte[] { 5, 6, 7, 8 };
