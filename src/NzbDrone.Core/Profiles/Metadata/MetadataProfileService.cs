@@ -277,7 +277,7 @@ namespace NzbDrone.Core.Profiles.Metadata
 
             if (!profiles.Any())
             {
-                _logger.Info("Setting up standard metadata profile");
+                _logger.Info("Setting up standard and all metadata profiles");
 
                 Add(new MetadataProfile
                 {
@@ -286,6 +286,17 @@ namespace NzbDrone.Core.Profiles.Metadata
                     SkipMissingDate = true,
                     SkipPartsAndSets = true,
                     AllowedLanguages = "eng, null"
+                });
+
+                Add(new MetadataProfile
+                {
+                    Name = "All",
+                    MinPopularity = 0,
+                    SkipMissingDate = false,
+                    SkipMissingIsbn = false,
+                    SkipPartsAndSets = false,
+                    SkipSeriesSecondary = false,
+                    AllowedLanguages = ""
                 });
             }
 

@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.Profiles.Metadata
             Subject.Handle(new ApplicationStartedEvent());
 
             Mocker.GetMock<IMetadataProfileRepository>()
-                  .Verify(v => v.Insert(It.IsAny<MetadataProfile>()), Times.Exactly(2));
+                  .Verify(v => v.Insert(It.IsAny<MetadataProfile>()), Times.Exactly(3));
         }
 
         [Test]

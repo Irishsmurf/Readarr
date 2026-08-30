@@ -7,6 +7,7 @@ import { createSelector } from 'reselect';
 import { setAuthorDetailsId, setAuthorDetailsSort } from 'Store/Actions/authorDetailsActions';
 import { setBooksTableOption, toggleBooksMonitored } from 'Store/Actions/bookActions';
 import { executeCommand } from 'Store/Actions/commandActions';
+import createAuthorMetadataProfileSelector from 'Store/Selectors/createAuthorMetadataProfileSelector';
 import createAuthorSelector from 'Store/Selectors/createAuthorSelector';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
@@ -17,9 +18,10 @@ function createMapStateToProps() {
   return createSelector(
     createClientSideCollectionSelector('books', 'authorDetails'),
     createAuthorSelector(),
+    createAuthorMetadataProfileSelector(),
     createDimensionsSelector(),
     createUISettingsSelector(),
-    (books, author, dimensions, uiSettings) => {
+    (books, author, metadataProfile, dimensions, uiSettings) => {
 
       const booksInGroup = books.items;
 
@@ -37,6 +39,8 @@ function createMapStateToProps() {
         sortKey: books.sortKey,
         sortDirection: books.sortDirection,
         authorMonitored: author.monitored,
+        authorId: author.id,
+        metadataProfile,
         isSmallScreen: dimensions.isSmallScreen,
         uiSettings
       };
