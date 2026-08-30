@@ -87,8 +87,6 @@ class EditCoverModal extends Component {
 
     this.setState({ isSaving: true, errorMessage: null });
 
-    const endpoint = `/mediacover/${type}/${id}`;
-
     let ajaxOptions;
 
     if (activeTab === 'url') {
@@ -98,7 +96,7 @@ class EditCoverModal extends Component {
       }
 
       ajaxOptions = {
-        url: endpoint,
+        url: `/mediacover/${type}/${id}`,
         method: 'POST',
         dataType: 'json',
         data: JSON.stringify({ url: imageUrl.trim() })
@@ -113,7 +111,7 @@ class EditCoverModal extends Component {
       formData.append('file', selectedFile);
 
       ajaxOptions = {
-        url: endpoint,
+        url: `/mediacover/${type}/${id}/upload`,
         method: 'POST',
         data: formData,
         processData: false,
