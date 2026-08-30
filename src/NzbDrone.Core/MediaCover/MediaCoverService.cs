@@ -363,7 +363,10 @@ namespace NzbDrone.Core.MediaCover
             }
 
             var mainFileName = GetCoverPath(author.Id, MediaCoverEntity.Author, MediaCoverTypes.Poster, ".jpg");
-            _diskProvider.WriteAllBytes(mainFileName, imageData);
+            using (var stream = new MemoryStream(imageData))
+            {
+                _diskProvider.SaveStream(stream, mainFileName);
+            }
 
             var heights = GetDefaultHeights(MediaCoverTypes.Poster);
             foreach (var height in heights)
@@ -405,7 +408,10 @@ namespace NzbDrone.Core.MediaCover
             }
 
             var mainFileName = GetCoverPath(book.Id, MediaCoverEntity.Book, MediaCoverTypes.Cover, ".jpg");
-            _diskProvider.WriteAllBytes(mainFileName, imageData);
+            using (var stream = new MemoryStream(imageData))
+            {
+                _diskProvider.SaveStream(stream, mainFileName);
+            }
 
             var heights = GetDefaultHeights(MediaCoverTypes.Cover);
             foreach (var height in heights)
