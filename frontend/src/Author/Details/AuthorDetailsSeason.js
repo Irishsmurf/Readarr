@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import { sortDirections } from 'Helpers/Props';
+import Alert from 'Components/Alert';
+import { kinds, sortDirections } from 'Helpers/Props';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import getToggledRange from 'Utilities/Table/getToggledRange';
 import BookRowConnector from './BookRowConnector';
@@ -84,8 +85,22 @@ class AuthorDetailsSeason extends Component {
       sortDirection,
       onSortPress,
       onTableOptionChange,
-      selectedState
+      selectedState,
+      metadataProfile
     } = this.props;
+
+    if (!items.length) {
+      const profileName = metadataProfile ? metadataProfile.name : 'current';
+      return (
+        <div className={styles.bookType}>
+          <div className={styles.books} style={{ padding: '20px' }}>
+            <Alert kind={kinds.INFO}>
+              No books found for this author. Books may have been filtered out by the active metadata profile (<strong>{profileName}</strong>). You can edit this author to change the metadata profile to <strong>All</strong> or adjust your profile filters in Settings &gt; Metadata Profiles.
+            </Alert>
+          </div>
+        </div>
+      );
+    }
 
     let titleColumns = columns;
     if (!isEditorActive) {
@@ -141,6 +156,7 @@ AuthorDetailsSeason.propTypes = {
   onSelectedChange: PropTypes.func.isRequired,
   onSortPress: PropTypes.func.isRequired,
   onMonitorBookPress: PropTypes.func.isRequired,
+  metadataProfile: PropTypes.object,
   uiSettings: PropTypes.object.isRequired
 };
 
