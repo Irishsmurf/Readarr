@@ -275,6 +275,25 @@ namespace NzbDrone.Core.Test.MediaCoverTests
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+
+            Mocker.GetMock<IAuthorMetadataService>()
+                  .Verify(v => v.Upsert(It.IsAny<AuthorMetadata>()), Times.Once());
+        }
+
+        [Test]
+        public void should_persist_author_cover_metadata_when_author_has_no_initial_images()
+        {
+            var authorWithoutImages = Builder<Author>.CreateNew()
+                .With(v => v.Id = 140)
+                .With(v => v.Metadata.Value.Images = new List<MediaCover.MediaCover>())
+                .Build();
+
+            var testBytes = new byte[] { 9, 10, 11 };
+            Subject.SaveAuthorCover(authorWithoutImages, testBytes, "https://example.com/jem-calder.jpg");
+
+            authorWithoutImages.Metadata.Value.Images.Should().ContainSingle(img => img.CoverType == MediaCoverTypes.Poster);
+            Mocker.GetMock<IAuthorMetadataService>()
+                  .Verify(v => v.Upsert(It.Is<AuthorMetadata>(m => m.Images.Any(img => img.CoverType == MediaCoverTypes.Poster))), Times.Once());
         }
 
         [Test]
@@ -288,6 +307,9 @@ namespace NzbDrone.Core.Test.MediaCoverTests
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+
+            Mocker.GetMock<IEditionService>()
+                  .Verify(v => v.UpdateMany(It.IsAny<List<Edition>>()), Times.Once());
         }
     }
 }

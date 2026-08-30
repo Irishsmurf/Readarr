@@ -36,6 +36,8 @@ namespace NzbDrone.Core.MediaCover
         private readonly IMediaCoverProxy _mediaCoverProxy;
         private readonly IImageResizer _resizer;
         private readonly IBookService _bookService;
+        private readonly IAuthorMetadataService _authorMetadataService;
+        private readonly IEditionService _editionService;
         private readonly IHttpClient _httpClient;
         private readonly IDiskProvider _diskProvider;
         private readonly ICoverExistsSpecification _coverExistsSpecification;
@@ -52,6 +54,8 @@ namespace NzbDrone.Core.MediaCover
         public MediaCoverService(IMediaCoverProxy mediaCoverProxy,
                                  IImageResizer resizer,
                                  IBookService bookService,
+                                 IAuthorMetadataService authorMetadataService,
+                                 IEditionService editionService,
                                  IHttpClient httpClient,
                                  IDiskProvider diskProvider,
                                  IAppFolderInfo appFolderInfo,
@@ -63,6 +67,8 @@ namespace NzbDrone.Core.MediaCover
             _mediaCoverProxy = mediaCoverProxy;
             _resizer = resizer;
             _bookService = bookService;
+            _authorMetadataService = authorMetadataService;
+            _editionService = editionService;
             _httpClient = httpClient;
             _diskProvider = diskProvider;
             _coverExistsSpecification = coverExistsSpecification;
@@ -394,6 +400,8 @@ namespace NzbDrone.Core.MediaCover
                 {
                     existingCover.Url = remoteUrl;
                 }
+
+                _authorMetadataService.Upsert(author.Metadata.Value);
             }
 
             _eventAggregator.PublishEvent(new MediaCoversUpdatedEvent(author));
@@ -440,6 +448,8 @@ namespace NzbDrone.Core.MediaCover
                 {
                     existingCover.Url = remoteUrl;
                 }
+
+                _editionService.UpdateMany(new List<Edition> { monitoredEdition });
             }
 
             _eventAggregator.PublishEvent(new MediaCoversUpdatedEvent(book));
