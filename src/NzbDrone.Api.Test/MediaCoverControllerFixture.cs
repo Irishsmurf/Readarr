@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,8 +52,7 @@ namespace NzbDrone.Api.Test
                 _authorService.Object,
                 _bookService.Object,
                 _coverService.Object,
-                _httpClient.Object
-            );
+                _httpClient.Object);
         }
 
         [Test]
@@ -62,7 +60,7 @@ namespace NzbDrone.Api.Test
         {
             var url = "https://example.com/cover.jpg";
             var imageData = Encoding.UTF8.GetBytes("fake-image-bytes");
-            var httpResponse = new HttpResponse(null, new HttpHeader(), imageData);
+            var httpResponse = new NzbDrone.Common.Http.HttpResponse(null, new HttpHeader(), imageData);
 
             _httpClient.Setup(c => c.Get(It.Is<NzbDrone.Common.Http.HttpRequest>(r => r.Url.FullUri == url)))
                        .Returns(httpResponse);
@@ -105,7 +103,7 @@ namespace NzbDrone.Api.Test
         {
             var url = "https://example.com/book.jpg";
             var imageData = Encoding.UTF8.GetBytes("fake-book-bytes");
-            var httpResponse = new HttpResponse(null, new HttpHeader(), imageData);
+            var httpResponse = new NzbDrone.Common.Http.HttpResponse(null, new HttpHeader(), imageData);
 
             _httpClient.Setup(c => c.Get(It.Is<NzbDrone.Common.Http.HttpRequest>(r => r.Url.FullUri == url)))
                        .Returns(httpResponse);
