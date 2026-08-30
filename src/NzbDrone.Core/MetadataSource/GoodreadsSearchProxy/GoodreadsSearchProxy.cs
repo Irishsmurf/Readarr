@@ -44,6 +44,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
                 {
                     var httpRequest = factory.Create()
                         .SetSegment("route", "search")
+                        .AddQueryParam("q", query)
                         .AddQueryParam("query", query)
                         .Build();
 
