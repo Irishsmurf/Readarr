@@ -124,7 +124,7 @@ namespace Readarr.Api.V1.MediaCovers
                 remoteUrl = urlRequest.Url.Trim();
                 try
                 {
-                    var response = _httpClient.Get(new HttpRequest(remoteUrl));
+                    var response = _httpClient.Get(new NzbDrone.Common.Http.HttpRequest(remoteUrl));
                     bytes = response.ResponseData;
                 }
                 catch (Exception ex)
@@ -175,7 +175,7 @@ namespace Readarr.Api.V1.MediaCovers
                 remoteUrl = urlRequest.Url.Trim();
                 try
                 {
-                    var response = _httpClient.Get(new HttpRequest(remoteUrl));
+                    var response = _httpClient.Get(new NzbDrone.Common.Http.HttpRequest(remoteUrl));
                     bytes = response.ResponseData;
                 }
                 catch (Exception ex)
