@@ -6,6 +6,9 @@ interface CssExports {
   'backdrop': string;
   'backdropOverlay': string;
   'cover': string;
+  'coverContainer': string;
+  'coverEditIcon': string;
+  'coverOverlay': string;
   'details': string;
   'detailsLabel': string;
   'duration': string;

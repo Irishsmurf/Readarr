@@ -263,5 +263,31 @@ namespace NzbDrone.Core.Test.MediaCoverTests
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(2));
         }
+
+        [Test]
+        public void should_save_author_cover_and_resize()
+        {
+            var testBytes = new byte[] { 1, 2, 3, 4 };
+            Subject.SaveAuthorCover(_author, testBytes, "https://example.com/cover.jpg");
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.SaveStream(It.IsAny<Stream>(), It.IsAny<string>()), Times.Once());
+
+            Mocker.GetMock<IImageResizer>()
+                  .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+        }
+
+        [Test]
+        public void should_save_book_cover_and_resize()
+        {
+            var testBytes = new byte[] { 5, 6, 7, 8 };
+            Subject.SaveBookCover(_book, testBytes, "https://example.com/bookcover.jpg");
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.SaveStream(It.IsAny<Stream>(), It.IsAny<string>()), Times.Once());
+
+            Mocker.GetMock<IImageResizer>()
+                  .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.AtLeastOnce());
+        }
     }
 }

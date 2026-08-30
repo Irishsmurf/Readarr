@@ -17,6 +17,9 @@ interface CssExports {
   'overview': string;
   'path': string;
   'poster': string;
+  'posterContainer': string;
+  'posterEditIcon': string;
+  'posterOverlay': string;
   'qualityProfileName': string;
   'sizeOnDisk': string;
   'tags': string;
