@@ -649,7 +649,11 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
                     }
                     else
                     {
-                        throw new BookInfoException("Unexpected error fetching author data");
+                        _logger.Warn("Upstream metadata provider returned status {0} for author {1}: {2}",
+                            (int)httpResponse.StatusCode,
+                            foreignAuthorId,
+                            httpResponse.Content.Truncate(200));
+                        throw new BookInfoException($"Unexpected error fetching author data for {foreignAuthorId} (HTTP {(int)httpResponse.StatusCode})");
                     }
                 }
 
